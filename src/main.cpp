@@ -32,8 +32,8 @@
 
 https://github.com/exothink/megasquirt-dash-display								je 12/3/20
 
-		// this is what broke the orig code because it was in init().  without this you get a gry screen
-		FT81x_W8(REG_PCLK + RAM_REG, EVE2_PCLK);//after this display is visible on the LCD //y
+		// this is what broke the orig code in init().  Need div by 2
+		FT81x_W8(REG_PCLK + RAM_REG, 5); // 60MHz/5 = 12MHz  need 60/2 = 30MHz
 
 		takes 4-5 secs/demo loop
 =========================================================================== */
@@ -86,12 +86,10 @@ void core()
 		//They are not processed by the EVE2 co-processor until FT81x_UpdateFIFO() is called.
 		FT81x_FIFO_WaitUntilEmpty();
 		//co-processor fifo is empty, continue
-
 		//tell the co-processor we are starting a new list of commands
 		FT81x_SendCommand(CMD_DLSTART);
 		//clear the screen
 		FT81x_SendCommand(CLEAR(1,1,1));
-
 		//draw display
 		//see screen1demo (s1demo.cpp) for detailed comments
 		switch (screen_num)
@@ -110,9 +108,6 @@ void core()
 		//start excuting the commands in the FIFO.
 		FT81x_UpdateFIFO();
 		//while its doing this, we go onto doing other things
-
-		// this is what broke the orig code because it was in init().  without this you get a gry screen
-		FT81x_W8(REG_PCLK + RAM_REG, EVE2_PCLK);//after this display is visible on the LCD //y
 
 		//led bar update
 		if (screen_num == 2)
