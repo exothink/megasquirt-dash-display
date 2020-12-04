@@ -30,6 +30,12 @@
  Other source-code / libraries taken from various sources with appropriate licences.
  See licence information contained within those files.
 
+https://github.com/exothink/megasquirt-dash-display								je 12/3/20
+
+		// this is what broke the orig code because it was in init().  without this you get a gry screen
+		FT81x_W8(REG_PCLK + RAM_REG, EVE2_PCLK);//after this display is visible on the LCD //y
+
+		takes 4-5 secs/demo loop
 =========================================================================== */
 
 #include <Arduino.h>
@@ -105,6 +111,9 @@ void core()
 		FT81x_UpdateFIFO();
 		//while its doing this, we go onto doing other things
 
+		// this is what broke the orig code because it was in init().  without this you get a gry screen
+		FT81x_W8(REG_PCLK + RAM_REG, EVE2_PCLK);//after this display is visible on the LCD //y
+
 		//led bar update
 		if (screen_num == 2)
 			//demo bar
@@ -133,7 +142,9 @@ void core()
 		pos++;
 		if (pos > 100)
 		{
-			DPRINT("LOOP100\n");
+			DPRINT("LOOP100  ");
+			DPRINT(screen_num);
+			DPRINT("\n");
 			pos = 0;
 		}
 	}

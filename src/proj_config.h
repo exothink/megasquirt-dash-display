@@ -32,18 +32,33 @@
 #define FT813_ENABLE	(1)
 #define EVE2_GT911		(1)
 
+// // Horizontal timing (minimum values from ILI6122_SPEC_V008.pdf page 45)
+// #define HPX   (800)    // Horizontal Pixel Width
+// #define HSW   (1)      // Horizontal Sync Width (1~40)
+// #define HBP   (46-HSW) // Horizontal Back Porch (must be 46, includes HSW)
+// #define HFP   (16)     // Horizontal Front Porch (16~210~354)
+// #define HPP   (116)    // Horizontal Pixel Padding (tot=863: 862~1056~1200)
+//                        // FTDI needs at least 1 here
+// // Vertical timing (minimum values from ILI6122_SPEC_V008.pdf page 46)
+// #define VLH   (480)   // Vertical Line Height
+// #define VS    (1)     // Vertical Sync (in lines)  (1~20)
+// #define VBP   (23-VS) // Vertical Back Porch (must be 23, includes VS)
+// #define VFP   (7)     // Vertical Front Porch (7~22~147)
+// #define VLP   (1)     // Vertical Line Padding (tot=511: 510~525~650)
+//                       // FTDI needs at least 1 here
+
 // Horizontal timing (minimum values from ILI6122_SPEC_V008.pdf page 45)
 #define HPX   (800)    // Horizontal Pixel Width
-#define HSW   (1)      // Horizontal Sync Width (1~40)
-#define HBP   (46-HSW) // Horizontal Back Porch (must be 46, includes HSW)
-#define HFP   (16)     // Horizontal Front Porch (16~210~354)
-#define HPP   (116)    // Horizontal Pixel Padding (tot=863: 862~1056~1200)
+#define HSW   (4)      // Horizontal Sync Width (1~40)
+#define HBP   (8) // Horizontal Back Porch (must be 46, includes HSW)
+#define HFP   (8)     // Horizontal Front Porch (16~210~354)
+#define HPP   (178)    // Horizontal Pixel Padding (tot=863: 862~1056~1200) 178
                        // FTDI needs at least 1 here
 // Vertical timing (minimum values from ILI6122_SPEC_V008.pdf page 46)
 #define VLH   (480)   // Vertical Line Height
-#define VS    (1)     // Vertical Sync (in lines)  (1~20)
-#define VBP   (23-VS) // Vertical Back Porch (must be 23, includes VS)
-#define VFP   (7)     // Vertical Front Porch (7~22~147)
+#define VS    (4)     // Vertical Sync (in lines)  (1~20)
+#define VBP   (8) // Vertical Back Porch (must be 23, includes VS)
+#define VFP   (8)     // Vertical Front Porch (7~22~147)
 #define VLP   (1)     // Vertical Line Padding (tot=511: 510~525~650)
                       // FTDI needs at least 1 here
 
