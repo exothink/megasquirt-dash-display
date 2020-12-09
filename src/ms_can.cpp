@@ -12,6 +12,8 @@
 #include "proj_config.h"
 #include "ms_can.h"
 
+
+
 //types of data contained in CAN packets can be found in the relevant MS.ini file.
 //See under [OutputChannels] section
 
@@ -30,7 +32,8 @@ void printFrame(CAN_FRAME *message)
 	Serial.print(" ");
 	for (int i = 0; i < message->length; i++)
 	{
-		Serial.print(message->data.byte[i], DEC);
+		Serial.print(message->data.byte[i], HEX);
+		// Serial.print(message->data.byte[i], DEC);
 		Serial.print(" ");
 	}
 	Serial.println();
@@ -42,7 +45,7 @@ void msCAN_Init(void)
 
 	//init can
 	memset(msCAN_Data, 0x00, MSCAN_LEN * sizeof(ms3_8b_t));
-	CAN0.begin(500000); //500k bit CAN
+	CAN0.begin(250000); // CAN data rate
 	CAN0.watchFor();
 
 	//first check
@@ -64,14 +67,16 @@ void msCAN_Check(void)
 			//possibly got a MS CAN DATA PACKET, keep it
 			memset(msCAN_Data[incoming.id - MSCAN_BASE].U08, 0x00, 8);
 			memcpy(msCAN_Data[incoming.id - MSCAN_BASE].U08, incoming.data.byte, incoming.length);
-			// printFrame(&incoming); //debug output
+
+		//	printFrame(&incoming); //debug output je
 		}
 	}
 }
 
 uint16_t msCAN_U16(uint16_t in)
 {
-#ifdef MSCAN_SWAPBYTES
+// #ifdef MSCAN_SWAPBYTES  !!!!!!!!!!!! marks error
+#if MSCAN_SWAPBYTES
 	return __builtin_bswap16(in);
 #else
 	return in;
@@ -80,7 +85,7 @@ uint16_t msCAN_U16(uint16_t in)
 
 uint32_t msCAN_U32(uint32_t in)
 {
-#ifdef MSCAN_SWAPBYTES
+#if MSCAN_SWAPBYTES
 	return __builtin_bswap32(in);
 #else
 	return in;
@@ -89,7 +94,7 @@ uint32_t msCAN_U32(uint32_t in)
 
 int16_t msCAN_S16(int16_t in)
 {
-#ifdef MSCAN_SWAPBYTES
+#if MSCAN_SWAPBYTES
 	ms_16b t;
 	t.S = in;
 	t.U = __builtin_bswap16(t.U);
@@ -101,7 +106,7 @@ int16_t msCAN_S16(int16_t in)
 
 int32_t msCAN_S32(int32_t in)
 {
-#ifdef MSCAN_SWAPBYTES
+#if MSCAN_SWAPBYTES
 	ms_32b t;
 	t.S = in;
 	t.U = __builtin_bswap32(t.U);

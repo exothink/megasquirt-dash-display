@@ -12,8 +12,8 @@
 
 #define SCREENS 3
 
-void screen1ms(void);
-void screen2ms(void);
-void screen1demo(int pos);
+void gaugePage1(void);
+void textPage1(void);
+void demoPage(int pos);
 
 #endif

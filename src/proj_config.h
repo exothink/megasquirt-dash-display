@@ -22,7 +22,7 @@
 #define LEDBAR_PIN			(32)
 
 #define EVE2_PIN_INT		(4)
-#define EVE2_PIN_PD			(0)
+#define EVE2_PIN_PD			(2)  //je works with Devkit v1 www.doit.am
 #define EVE2_PIN_CS			(5)
 #define SPI_SPEED       	(20000000L) /* FT81x up to 30Mhz */
 #define EVE2_WORKBUFSIZE	(32)
@@ -31,6 +31,69 @@
 #ifdef CFAF800480E0_050SC_A1_1
 #define FT813_ENABLE	(1)
 #define EVE2_GT911		(1)
+ 
+enum zoneIdx : uint8_t
+{
+  zone0,
+  zone1,
+  zone2,
+  zone3
+};
+
+enum measAdr : uint8_t // CAN Bus measurement addr (ID)
+{
+  adrAuxBat,
+  adrBattery,
+  adrHeadT,
+  adrCoolantT,
+  adrCoolantP,
+  adrFuelPres,
+  adrFuelGal,
+  adrOilPres,
+  adrRPM,    // 0x68
+  adrSpeed,
+  EOA
+}; // 0x0 - 0x9
+
+struct rgb
+{
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+};
+
+struct dialFace
+{
+    uint8_t tag;
+    const char *title[1]; // no other syntax works -> *title[1];
+    const char *units[1];
+    // uint8_t num;      // number of zones, 3 max
+    int16_t zone[4];  // zone start and stop values, zone[0] = dialMin, zone[3] = dialMax
+    rgb zoneColor[3]; // zone colors
+    int8_t width[3];  // line width of zone
+    rgb digiColor[3]; // zone colors
+};
+
+
+const rgb aqua = {0, 255, 255};
+const rgb blk = {0, 0, 0};
+const rgb blu = {0, 0, 255};
+const rgb grn = {0, 255, 0};
+const rgb red = {255, 0, 0};
+const rgb wht = {255, 255, 255};
+const rgb yel = {255, 255, 0};
+
+const dialFace auxBat = {1, "Aux Batt", "v", {0, 13, 15, 16}, {red, aqua, red}, {1, 2, 1}, {red, grn, red}};
+const dialFace battery = {2, "BATT", "v", {0, 13, 15, 16}, {red, aqua, red}, {1, 2, 1}, {red, grn, red}};
+const dialFace headT = {3, "CHT", "f", {85, 215, 325, 325}, {aqua, red, blk}, {1, 3, 0}, {grn, red, blk}};
+const dialFace coolantT = {4, "COOLANT", "f", {0, 215, 275, 275}, {aqua, red, blk}, {1, 3, 0}, {grn, red, blk}};
+const dialFace coolantP = {5, "COOLANT", "#", {0, 5, 15, 20}, {red, aqua, red}, {1, 2, 1}, {red, grn, red}};
+const dialFace fuelPres = {6, "FUEL", "#", {0, 27, 32, 40}, {red, aqua, red}, {1, 2, 1}, {red, grn, red}};
+const dialFace fuelGal = {7, "FUEL", "G", {0, 2, 3, 16}, {red, yel, aqua}, {3, 2, 1}, {red, yel, grn}};
+const dialFace oilPres = {8, "Oil", "#", {20, 45, 55, 60}, {red, aqua, red}, {1, 2, 1}, {red, grn, red}};
+const dialFace rpm = {9, "RPM", "", {0, 6000, 7500, 8000}, {aqua, yel, red}, {1, 3, 3}, {grn, yel, red}};
+const dialFace speed = {10, "MPH", "", {0, 80, 120, 120}, {aqua, yel, blk}, {1, 3, 0}, {grn, yel, blk}};
+
 
 // // Horizontal timing (minimum values from ILI6122_SPEC_V008.pdf page 45)
 // #define HPX   (800)    // Horizontal Pixel Width

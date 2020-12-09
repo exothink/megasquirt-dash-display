@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "..\\..\\eXoCanDataSim"
+		},
+		{
+			"path": "..\\..\\vanagonDash"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"cmath": "cpp",
+			"random": "cpp",
+			"*.tcc": "cpp"
+		}
+	}
+}

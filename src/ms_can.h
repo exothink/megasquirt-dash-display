@@ -13,12 +13,14 @@
 #include "proj_config.h"
 
 //MS CAN broadcast base address
-#define MSCAN_BASE			1520
+#define MSCAN_BASE			0x60// 1520
 //up to 64 following addresses
-#define MSCAN_LEN			64
+#define MSCAN_LEN			EOA
+
+
 
 //enable if data needs endianness swapping
-#define MSCAN_SWAPBYTES		1
+#define MSCAN_SWAPBYTES		0  //je  1
 
 //convienient way of storing a single address of data, 8 bytes
 typedef union

@@ -1,56 +1,38 @@
 /* ===========================================================================
 
  5-inch MEGASQUIRT ECU CANBus Dashboard Display
- proof of concept
-
- This project in current form "works", but is rough around the edges.
- It needs a nicer method of screen configuration, and a LOT of optimisation.
+ C:\Users\EliteDesk\Documents\PlatformIO\Projects\squirtDash\src\main.cpp
 
  This project is based around:
  - NodeMCU-32s ESP32 (WROOM-32) module
-    https://www.amazon.com/s?k=nodemcu32s
- - Crystalfontz 800x480 TFT with Graphic Accelerator Board
-    https://www.crystalfontz.com/product/cfaf800480e0050sca11-accelerated-tft-lcd-display-kit
- - Crystalfontz CFA10098 breakout board
-    https://www.crystalfontz.com/product/cfa10098-eve-breakout-board
- - WS2812b LEDs (aka Neopixels)
- 	https://www.amazon.com/s?k=neopixel+8+stick
- - Any MC2551 CAN bus Tranciever Module setup for 5V
-    https://www.amazon.com/s?k=mcp2551+module
- - Any 5V 2-amp (or higher) regulator suitable for automotive use
-
- I programmed this in the PlatformIO development environment.
- The Arduino IDE could be used with some minor modifications.
- PlatformIO needs to have the NodeMCU-32s board support (using Arduino framework)
- installed.
+   
+ - FT813 EVE lcd graphics chip
 
  Mark Williams (2019-07-01)
  Distributed under the GNU GENERAL PUBLIC LICENSE v3.0 (see LICENCE file)
-
- Other source-code / libraries taken from various sources with appropriate licences.
- See licence information contained within those files.
 
 https://github.com/exothink/megasquirt-dash-display								je 12/3/20
 
 		// this is what broke the orig code in init().  Need div by 2
 		FT81x_W8(REG_PCLK + RAM_REG, 5); // 60MHz/5 = 12MHz  need 60/2 = 30MHz
 
-		takes 4-5 secs/demo loop
+		takes 4.6 secs/demo loop
 =========================================================================== */
 
 #include <Arduino.h>
 #include <SPI.h>
-
 #include "proj_config.h"
-
 #include "ft81x_io.h"
 #include "ft81x.h"
 #include "cf_gt911.h"
-
 #include "ms_can.h"
 #include "ledbar.h"
-
 #include "screens.h"
+
+// timing macro 
+uint32_t a;
+#define tic a = micros();
+#define toc Serial.print(micros()-a-1); Serial.println("uS");
 
 //globals
 char _debugbuf[DPRINT_SIZE];
@@ -60,11 +42,12 @@ void core()
 	uint16_t pos = 0;
 	uint8_t touched = 0;
 	uint8_t touch_check = 0;
-	uint8_t screen_num = 2;
+	uint8_t screen_num = 0;
 	DPRINT("CORE LOOP\n");
 
 	while(1)
 	{
+//	tic		
 		//gather data
 		msCAN_Check();
 
@@ -85,39 +68,23 @@ void core()
 		//it to process later. All FT81x_SendCommand() commands go onto the fifo.
 		//They are not processed by the EVE2 co-processor until FT81x_UpdateFIFO() is called.
 		FT81x_FIFO_WaitUntilEmpty();
-		//co-processor fifo is empty, continue
-		//tell the co-processor we are starting a new list of commands
-		FT81x_SendCommand(CMD_DLSTART);
-		//clear the screen
+		FT81x_SendCommand(CMD_DLSTART);  //tell the co-processor we are starting a new list of commands
 		FT81x_SendCommand(CLEAR(1,1,1));
 		//draw display
 		//see screen1demo (s1demo.cpp) for detailed comments
+		// timing macro 
+
 		switch (screen_num)
 		{
-			case 0: screen1ms(); break;
-			case 1: screen2ms(); break;
-			case 2: screen1demo(pos); break;
+			case 0: gaugePage1(); break;	// gauges w/ can data	
+			case 1: textPage1(); break;  	// text
+			//case 2: demoPage(pos); break; 	// gauges w/ fake data
 		}
 
-		//add to the fifo an end-of-commands marker
-		FT81x_SendCommand(DISPLAY());
-		//when the co-processor engine executes CMD_SWAP, it requests a display list swap
-		//immediately after current display list (current frame) is scanned out.
+		FT81x_SendCommand(DISPLAY());  		// fifo an end-of-commands marker
 		FT81x_SendCommand(CMD_SWAP);
-		//all done, nothing more to add to the co-processor FIFO, tell the co-processor to
-		//start excuting the commands in the FIFO.
-		FT81x_UpdateFIFO();
-		//while its doing this, we go onto doing other things
+		FT81x_UpdateFIFO();  				//start excuting the commands in the FIFO.
 
-		//led bar update
-		if (screen_num == 2)
-			//demo bar
-			LEDBar_Update(0, 100, pos, 65, 85); //demo
-		else
-			//real rpm bar
-			LEDBar_Update(0, 7200, msCAN_U16(msCAN_Data[0].U16[3]), 6400, 7000); //RPM
-
-		//flip screens if display was touched
 		//debounce
 		if (!touch_check && touched)
 			//screen has been touched, but was not touched on last loop
@@ -126,22 +93,23 @@ void core()
 		{
 			//no longer touched, but was on last loop = touched and released
 			//rotate screens
-			screen_num++;
+			screen_num++;					//flip screens if display was touched
 			if (screen_num >= SCREENS)
 				screen_num = 0;
 			//reset
 			touch_check = 0;
 		}
 
-		//demo screen counter
+	//	demo screen counter
 		pos++;
-		if (pos > 100)
+		if (pos > 100)  // dummy gauge data for demo
 		{
 			DPRINT("LOOP100  ");
 			DPRINT(screen_num);
 			DPRINT("\n");
 			pos = 0;
 		}
+//	toc
 	}
 }
 
@@ -155,7 +123,7 @@ void setup()
 	DPRINT("\n\nSETUP STARTED\n");
 
 	//led bar
-	LEDBar_Init();
+//	LEDBar_Init();
 
 	//can setup
 	msCAN_Init();
@@ -164,7 +132,8 @@ void setup()
 	DPRINT("LCD SETUP\n");
 	SPI_Setup();
 	FT81x_Init();
-	FT81x_SetBacklight(10);
+	FT81x_SetBacklight(1);
+
 	//increase SPI rate after init
 	SPI_FullSpeed();
 
