@@ -20,9 +20,8 @@ void gaugePage1(void)
 {
 	//top RPM bar
 	//rpm = scalar, U16, 6, "RPM", 1.000, 0.0
-	//float RPM = msCAN_U16(msCAN_Data[0].U16[3]);
 	float RPM = msCAN_U16(msCAN_Data[adrRPM].U16[0]);  //je
-	Gauge_HDashBar(20, 10, 800-20, 80,
+	Gauge_HDashBar(20, 10, 800-20, 20,
 		8, 15,
 		COLOR_RGB(10,10,30),
 		COLOR_RGB(0,255,0),
@@ -31,7 +30,8 @@ void gaugePage1(void)
 		BARS_SHOWTEXT,
 		0, 7200, RPM,
 		140, 22,
-		"", "%0.0f", 1, 31);
+		"", "%0.0f", 1, 30);  // 31
+
 
 	//AFR gauge
 	//called AFR0 in TunerStudio, but AFR1 in MS ini
@@ -96,7 +96,7 @@ void gaugePage1(void)
 		255,370, 100, 		// x,y, radius
 	//	0, 270,				// start, end angle
 	  //  -160, 110,
-	    135, 45,
+	    180.0f, 90.0f, //angle
 		coolantT.zone[zone0], coolantT.zone[zone3],  // start, end vals
 		3,					// circle weight
 		25, 80, 2,			// major spacing, iradius, width
@@ -107,24 +107,24 @@ void gaugePage1(void)
 		"%0.0f", 1, 29		// value_format, value_multiplier, value_font 
 	);
 
-	//Coolant Pressure
-	//I have set this up as a generic input on sensor9
-	//sensor09 = scalar, S16,  120, "",   0.1000, 0.0
-	float CLP = msCAN_S16(msCAN_Data[adrCoolantP].S16[0]) * 0.1f;
-	//it's in KPA, convert to PSI
-	CLP /= 6.895f;
-	Gauge_RDial(
-		545,370, 100,
-		0, 270,
-		0, 25,
-		3,
-		5, 80, 2,
-		1, 85, 0.8,
-		65, "%0.0f", 1, 26,
-		2.5, CLP,
-		"CL-P", 28,
-		"%0.1f", 1, 29
-	);
+	// //Coolant Pressure
+	// //I have set this up as a generic input on sensor9
+	// //sensor09 = scalar, S16,  120, "",   0.1000, 0.0
+	// float CLP = msCAN_S16(msCAN_Data[adrCoolantP].S16[0]) * 0.1f;
+	// //it's in KPA, convert to PSI
+	// CLP /= 6.895f;
+	// Gauge_RDial(
+	// 	545,370, 100,
+	// 	0, 270,
+	// 	0, 25,
+	// 	3,
+	// 	5, 80, 2,
+	// 	1, 85, 0.8,
+	// 	65, "%0.0f", 1, 26,
+	// 	2.5, CLP,
+	// 	"CL-P", 28,
+	// 	"%0.1f", 1, 29
+	// );
 
 }
 

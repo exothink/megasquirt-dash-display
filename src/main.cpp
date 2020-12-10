@@ -17,6 +17,7 @@ https://github.com/exothink/megasquirt-dash-display								je 12/3/20
 		FT81x_W8(REG_PCLK + RAM_REG, 5); // 60MHz/5 = 12MHz  need 60/2 = 30MHz
 
 		takes 4.6 secs/demo loop
+	added color zone to gauge_rdial.cpp	for dials.								12/10	
 =========================================================================== */
 
 #include <Arduino.h>

@@ -93,11 +93,11 @@ void Gauge_HDashBar(uint16_t x, uint16_t y, uint16_t bar_width, uint16_t bar_hei
 		box_midy = y+(bar_height/2); //-(label_box_height/2)-10;
 
 		FT81x_SendCommand(BEGIN(LINES));
-		FT81x_SendCommand(COLOR_A(200));
+		FT81x_SendCommand(COLOR_A(135));
 		Gauge_UpdateColor(COLOR_RGB(0,0,0));
 		FT81x_SendCommand(LINE_WIDTH(label_box_height*16));
-		FT81x_SendCommand(VERTEX2F((box_midx-(label_box_width/2))*16, box_midy * 16));
-		FT81x_SendCommand(VERTEX2F((box_midx+(label_box_width/2))*16, box_midy * 16));
+		FT81x_SendCommand(VERTEX2F((box_midx-(label_box_width/5))*16, box_midy * 16));
+		FT81x_SendCommand(VERTEX2F((box_midx+(label_box_width/5))*16, box_midy * 16));
 
 		FT81x_SendCommand(COLOR_A(255));
 		Gauge_UpdateColor(COLOR_RGB(255,255,255));

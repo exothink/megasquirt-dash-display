@@ -71,17 +71,11 @@ void Gauge_RDial(uint16_t cx, uint16_t cy, uint16_t circle_radius,
 {
 	//create a custom gauge background
 	//ported from (ewwwww) PHP
-	char tf[16];
+	char tf[16]; //value text buffer
 
 	//pre-calc
-	// float angleRng = 0;
-	// if (angle_start < angle_end)
-	// 	angleRng = angle_end - angle_start;
-	// else
-	// 	angleRng = (360 - angle_start) + angle_end;
-
-	if (angle_start > angle_end)  // je
-		angle_start -= 360;
+	if (angle_start > angle_end) // je
+		angle_start -= 360.0f;
 	float angleRng = angle_end - angle_start;
 
 	//setup
@@ -98,114 +92,47 @@ void Gauge_RDial(uint16_t cx, uint16_t cy, uint16_t circle_radius,
 	FT81x_SendCommand(COLOR_RGB(255, 255, 255));
 
 	//minor ticks
-	// ================================
 	float incr_angle = (angleRng / (value_end - value_start)) * minor_spacing;
-	float tickcnt = (value_end - value_start) / minor_spacing;
 	float angle = angle_start;
-	uint16_t s;
 	FT81x_SendCommand(BEGIN(LINES));
 	FT81x_SendCommand(LINE_WIDTH((uint16_t)(minor_width * 16)));
-	// for (s = 0; s < tickcnt + 1; s++)
 	for (angle = angle_start; angle <= angle_end; angle += incr_angle)
-	{
-		// if (angle >= 360)
-		// 	angle -= 360;
-		radial_line(cx, cy, minor_iradius, circle_radius - circle_weight - 1, angle); // angle in degrees
-																					  // if (angle >= 180 && angle <= 190)
-																					  // 	angular_line(cx, cy, circle_radius - circle_weight - 5, angle, angle + incr_angle); //je
-																					  //angle += incr_angle;
-	}
-	//=============================
-
-	//---------------------------
-	// float incr_angle = (angleRng / (value_end - value_start)) * minor_spacing;
-	// float tickcnt = (value_end - value_start) / minor_spacing;
-	// float angle = angle_start;
-	// uint16_t s;
-	// FT81x_SendCommand(BEGIN(LINES));
-	// FT81x_SendCommand(LINE_WIDTH((uint16_t)(minor_width * 16)));
-	// for (s = 0; s < tickcnt + 1; s++)
-	// {
-	// 	// if (angle >= 360)
-	// 	// 	angle -= 360;
-	// 	radial_line(cx, cy, minor_iradius, circle_radius - circle_weight - 1, angle);  // angle in degrees
-	// 	// if (angle >= 180 && angle <= 190)
-	// 	// 	angular_line(cx, cy, circle_radius - circle_weight - 5, angle, angle + incr_angle); //je
-	// 	angle += incr_angle;
-	// }
-	//-------------------------------
-
+			radial_line(cx, cy, minor_iradius, circle_radius - circle_weight - 1, angle); // angle in degrees
+	
 	//zones
-	//	float zValue;
-	float zValue_start = 170;
-	float zValue_end = 210;
+	float zValue_start = coolantT.zone[zone1];
+	float zValue_end = coolantT.zone[zone2];
 
-	// if (zValue > zValue_end)
-	// 	zValue = zValue_end;
-	// if (zValue < zValue_start)
-	// 	zValue = zValue_start;
-
-	//	zValue = zValue - zValue_start;
-	tickcnt = (zValue_end - zValue_start) / minor_spacing;
-	float dangle = (angleRng / (value_end - value_start)) * zValue_start;
-	//dangle += angle_start;
-	if (dangle >= 360)
-		dangle -= 360;
-	float deltaDegrees = ((dangle - 90) / 360.0f) * 2 * PI;
-	// float dx = ((circle_radius - (circle_weight * 4)) * cos(deltaDegrees)) + cx;
-	// float dy = ((circle_radius - (circle_weight * 4)) * sin(deltaDegrees)) + cy;
+	float angleStart = angle_start + ((angle_end - angle_start) / (value_end - value_start)) * (zValue_start);
+	float angleStop = angle_start + ((angle_end - angle_start) / (value_end - value_start)) * (zValue_end);
+	incr_angle = ((angle_end - angle_start) / (value_end - value_start)) * minor_spacing;
 	FT81x_SendCommand(COLOR_RGB(255, 0, 0));
 	FT81x_SendCommand(BEGIN(LINE_STRIP));
 	FT81x_SendCommand(LINE_WIDTH((uint16_t)(minor_width * 16 * 4)));
-	//	FT81x_SendCommand(
-	for (s = 0; s < 4 + 1; s++)
+	for (angle = angleStart; angle <= angleStop; angle += incr_angle) 
 	{
-		if (angle >= 360)
-			angle -= 360;
-		// radial_line(cx, cy, minor_iradius, circle_radius - circle_weight - 1, angle);
-		//if (angle >= 180 && angle <= 190)
-		//	angular_line(cx, cy, circle_radius - circle_weight - 5, angle, angle + incr_angle); //je
-		float dx = ((circle_radius - (circle_weight * 4)) * cos(deltaDegrees * 2 * pi)) + cx;
-		float dy = ((circle_radius - (circle_weight * 4)) * sin(deltaDegrees * 2 * pi)) + cy;
+		float r = (angle / 360.0f) * 2 * pi;
+		float dx = ((circle_radius - (circle_weight * 2)) * cos(r)) + cx;
+		float dy = ((circle_radius - (circle_weight * 2)) * sin(r)) + cy;
 		FT81x_SendCommand(VERTEX2F(((int)dx) * 16, ((int)dy) * 16));
-		if (value > 170)
-		{
-			Serial.print(s);
-			Serial.print(" ");
-			Serial.print(deltaDegrees * 2 * pi);
-			Serial.print(" ");
-			Serial.print(dx);
-			Serial.print(" ");
-			Serial.println(dy);
-		}
-		deltaDegrees += incr_angle / (2 * PI);
 	}
 
 	//major ticks
 	incr_angle = (angleRng / (value_end - value_start)) * major_spacing;
-	tickcnt = (value_end - value_start) / major_spacing;
 	angle = angle_start;
 	FT81x_SendCommand(COLOR_RGB(255, 255, 255));
 	FT81x_SendCommand(BEGIN(LINES));
 	FT81x_SendCommand(LINE_WIDTH((uint16_t)(major_width * 16)));
-	for (s = 0; s < tickcnt + 1; s++)
-	{
-		if (angle >= 360)
-			angle -= 360;
+	for (angle = angle_start; angle <= angle_end + 1; angle += incr_angle)
 		radial_line(cx, cy, major_iradius, circle_radius - circle_weight - 1, angle);
-		angle += incr_angle;
-	}
 
-	//majors text
+	//major text
 	angle = angle_start;
 	float tvalue = value_start;
-	for (s = 0; s < tickcnt + 1; s++)
+	for (angle = angle_start; angle <= angle_end + 1; angle += incr_angle)
 	{
-		if (angle >= 360)
-			angle -= 360;
 		sprintf(tf, major_format, tvalue * major_multiplier);
 		text_at(cx, cy, major_num_radius, angle, major_font, tf);
-		angle += incr_angle;
 		tvalue += major_spacing;
 	}
 
@@ -221,26 +148,25 @@ void Gauge_RDial(uint16_t cx, uint16_t cy, uint16_t circle_radius,
 	}
 
 	//dial (center dot)
-	if (value > value_end)
+	if (value > value_end) // keep needle between min and max
 		value = value_end;
 	if (value < value_start)
 		value = value_start;
 	value = value - value_start;
-	// float
-	dangle = (angleRng / (value_end - value_start)) * value; // y = (angleRng / valueRange)*x
-	dangle += angle_start;									 // y = mx + b
+	float dangle = (angleRng / (value_end - value_start)) * value; // y = (angleRng / valueRange)*x
+	dangle += angle_start;										   // y = mx + b
 	// if (dangle >= 360)je
 	// 	dangle -= 360;
 	// float
 	// deltaDegrees = ((dangle - 90) / 360.0f) * 2 * PI;
-	deltaDegrees = ((dangle) / 360.0f) * 2 * PI;
+	float deltaDegrees = ((dangle) / 360.0f) * 2 * PI;
 	float dx = ((circle_radius - (circle_weight * 4)) * cos(deltaDegrees)) + cx; // abs x location on disp
 	float dy = ((circle_radius - (circle_weight * 4)) * sin(deltaDegrees)) + cy; // abs y location on disp
 	FT81x_SendCommand(COLOR_RGB(255, 255, 0));									 // of yellow needle tip
 	FT81x_SendCommand(BEGIN(LINES));
 	FT81x_SendCommand(LINE_WIDTH((uint8_t)(dial_weight * 16)));
-	FT81x_SendCommand(VERTEX2F(cx * 16, cy * 16));
-	FT81x_SendCommand(VERTEX2F((int)(dx * 16.0f), (int)(dy * 16.0f)));
+	FT81x_SendCommand(VERTEX2F(cx * 16, cy * 16));					   // needle origin
+	FT81x_SendCommand(VERTEX2F((int)(dx * 16.0f), (int)(dy * 16.0f))); // needle tip
 
 	//center circle
 	FT81x_SendCommand(BEGIN(POINTS));
