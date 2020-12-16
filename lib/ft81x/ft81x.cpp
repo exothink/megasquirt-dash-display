@@ -15,7 +15,7 @@
 #include "cf_gt911.h"
 
 //globals
-uint16_t FT81x_FIFOLocation = 0;
+uint16_t FT81x_FIFOLocation = 0;  // command list address
 
 // init
 void FT81x_Init(void)
@@ -72,8 +72,8 @@ void FT81x_Init(void)
 	//setup GPIO
 	// FT81x_W16(REG_GPIOX_DIR + RAM_REG, 0x8000);
 	// FT81x_W16(REG_GPIOX + RAM_REG, 0x8000);
-	FT81x_W8(REG_GPIO_DIR + RAM_REG, 0x80 | FT81x_R8(REG_GPIO_DIR + RAM_REG)); //no
-	FT81x_W8(REG_GPIO + RAM_REG, 0x80 | FT81x_R8(REG_GPIO + RAM_REG));//enable display bit //y
+	FT81x_W8(REG_GPIO_DIR + RAM_REG, 0x80 | FT81x_R8(REG_GPIO_DIR + RAM_REG)); 
+	FT81x_W8(REG_GPIO + RAM_REG, 0x80 | FT81x_R8(REG_GPIO + RAM_REG));//enable display bit
 	//setup backlight
 	FT81x_W16(REG_PWM_HZ + RAM_REG, 250);
 	FT81x_W8(REG_PWM_DUTY + RAM_REG, 0x00);
@@ -172,9 +172,9 @@ uint8_t FT81x_R8(uint32_t address)
 //send a command & update fifo location
 void FT81x_SendCommand(uint32_t data)
 {
-	FT81x_W32(FT81x_FIFOLocation + RAM_CMD, data);
+	FT81x_W32(FT81x_FIFOLocation + RAM_CMD, data);  // FT81x_FIFOLocation + RAM_CMD is where to write in DL
 	FT81x_FIFOLocation += FT_CMD_SIZE;
-	FT81x_FIFOLocation %= FT_CMD_FIFO_SIZE;
+	FT81x_FIFOLocation %= FT_CMD_FIFO_SIZE;         // addr after last DL command
 }
 
 //write the fifo location

@@ -110,21 +110,21 @@ void gaugePage1(void)
 	// //Coolant Pressure
 	// //I have set this up as a generic input on sensor9
 	// //sensor09 = scalar, S16,  120, "",   0.1000, 0.0
-	// float CLP = msCAN_S16(msCAN_Data[adrCoolantP].S16[0]) * 0.1f;
-	// //it's in KPA, convert to PSI
-	// CLP /= 6.895f;
-	// Gauge_RDial(
-	// 	545,370, 100,
-	// 	0, 270,
-	// 	0, 25,
-	// 	3,
-	// 	5, 80, 2,
-	// 	1, 85, 0.8,
-	// 	65, "%0.0f", 1, 26,
-	// 	2.5, CLP,
-	// 	"CL-P", 28,
-	// 	"%0.1f", 1, 29
-	// );
+	float CLP = msCAN_S16(msCAN_Data[adrCoolantP].S16[0]) * 0.1f;
+	//it's in KPA, convert to PSI
+	CLP /= 6.895f;
+	Gauge_RDial(
+		545,370, 100,
+		0, 270,
+		0, 25,
+		3,
+		5, 80, 2,
+		1, 85, 0.8,
+		65, "%0.0f", 1, 26,
+		2.5, CLP,
+		"CL-P", 28,
+		"%0.1f", 1, 29
+	);
 
 }
 

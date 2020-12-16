@@ -19,7 +19,7 @@ extern "C"
 {
 #endif
 
-#define HCMD_ACTIVE      0x00
+#define HCMD_ACTIVE      0x00               // host commands 
 #define HCMD_STANDBY     0x41
 #define HCMD_SLEEP       0x42
 #define HCMD_PWRDOWN     0x50
@@ -29,7 +29,7 @@ extern "C"
 #define HCMD_CLK36M      0x61
 #define HCMD_CORERESET   0x68
 
-#define CMD_APPEND           0xFFFFFF1E
+#define CMD_APPEND           0xFFFFFF1E     // commands
 #define CMD_BGCOLOR          0xFFFFFF09
 #define CMD_BUTTON           0xFFFFFF0D
 #define CMD_CALIBRATE        0xFFFFFF15 // 4294967061UL
@@ -84,7 +84,7 @@ extern "C"
 
 #define DLSWAP_FRAME         2UL
 
-#define OPT_CENTER           1536UL
+#define OPT_CENTER           1536UL                 // options that fine tune appearance
 #define OPT_CENTERX          512UL
 #define OPT_CENTERY          1024UL
 #define OPT_FLAT             256UL
@@ -115,6 +115,9 @@ extern "C"
 // Discussion: Defining this way leads to an additional add operation in code that can be avoided by defining
 // these addresses as 32 bit values, but this is easily paid for in clarity and coorelation to documentation.
 // Further, you can add defines together in code and allow the precompiler to do the add operation (as here).
+
+                                            // memory mapped register address offsets
+                                            // base addr = RAM_REG, 0x302000
 #define REG_CSPREAD               0x68
 #define REG_DITHER                0x60
 #define REG_DLSWAP                0x54
@@ -323,7 +326,7 @@ extern "C"
 #define MAKE_COLOR(r,g,b) (( r << 16) | ( g << 8) | (b))
 
 // Global Variables
-extern uint16_t FT81x_FIFOLocation;
+extern uint16_t FT81x_FIFOLocation;  // end of last DL + 1
 
 // Function Prototypes
 void FT81x_Init(void);
