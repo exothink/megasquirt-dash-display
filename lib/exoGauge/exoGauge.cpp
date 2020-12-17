@@ -97,8 +97,6 @@ void exoGauge::drawGauge()
 	float angleRng = angle_end - angle_start;
 
 	//setup
-	FT81x_SendCommand(CLEAR_COLOR_RGB(0, 0, 0));
-	FT81x_SendCommand(CLEAR(1, 1, 1));
 	FT81x_SendCommand(COLOR_A(255));
 	FT81x_SendCommand(COLOR_RGB(255, 255, 255));
 
