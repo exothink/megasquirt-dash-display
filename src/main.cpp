@@ -21,6 +21,9 @@ https://github.com/exothink/megasquirt-dash-display								je 12/3/20
 	screen update rate 16.55mS.  60 frames/Sec
 	added exoGauge(parms...) constructor of kind Gauge_RDial(parms...)
 	five gauges on one screen working											12/16
+	RAM:   [=         ]   5.2% (used 17084 bytes from 327680 bytes)
+	Flash: [==        ]  18.8% (used 246060 bytes from 1310720 bytes)
+	touch screen rotates through pages											12/17
 =========================================================================== */
 
 #include <Arduino.h>
@@ -42,8 +45,8 @@ uint32_t a;
 	Serial.println("uS");
 
 uint16_t dlSize;
+int staticRendered = 0;
 
-// float MPH = msCAN_Data[adrSpeed].U08[0] * 0.1f;
 exoGauge gMPH(
 	110, 220, 100,
 	135, 45, // orig 225, 135
@@ -68,11 +71,9 @@ exoGauge gRPM(
 	"RPM", 28,
 	"%0.0f", 1, 29);
 
-exoGauge gCLT(
+exoGauge gCLT(									// Coolant Temp
 	255, 370, 100,								// x,y, radius
-												//	0, 270,				// start, end angle
-												//  -160, 110,
-	180.0f, 90.0f,								//angle
+	180.0f, 90.0f,								// start, end angle
 	coolantT.zone[zone0], coolantT.zone[zone3], // start, end vals
 	3,											// circle weight
 	30, 80, 2,									// major spacing, iradius, width
@@ -83,7 +84,7 @@ exoGauge gCLT(
 	"%0.0f", 1, 29								// value_format, value_multiplier, value_font
 );
 
-exoGauge gCLP(
+exoGauge gCLP( // Coolant Pressure
 	545, 370, 100,
 	0, 270,
 	0, 15,
@@ -95,13 +96,7 @@ exoGauge gCLP(
 	"CL-P", 28,
 	"%0.1f", 1, 29);
 
-//Oil Pressure
-//I have set this up as a generic input on sensor7
-//sensor07 = scalar, S16,  116, "", 0.1000, 0.0
-
-//it's in KPA, convert to PSI
-//OILP /= 6.895f;
-exoGauge gOILP(
+exoGauge gOILP( //Oil Pressure
 	690, 220, 100,
 	0, 270,
 	0, 60,
@@ -112,6 +107,16 @@ exoGauge gOILP(
 	2.5, 0,
 	"OIL-P", 28,
 	"%0.0f", 1, 29);
+
+int gDrawStaticPg1()
+{
+	gMPH.drawGauge(); // draw gauges minus needle and digital value
+	gRPM.drawGauge();
+	gCLT.drawGauge();
+	gCLP.drawGauge();
+	gOILP.drawGauge();
+	return 1;
+}
 
 //globals
 char _debugbuf[DPRINT_SIZE];
@@ -132,49 +137,51 @@ void core()
 
 	while (1)
 	{
-		tic
+		// tic
 
 		msCAN_Check(); // check for CAN data
-
-		//check for screen touch
 		touched = !(FT81x_R32(REG_CTOUCH_TOUCH_XY + RAM_REG) & 0x8000);
-
-
 		FT81x_FIFO_WaitUntilEmpty();	// wait for DL is empty
 		FT81x_SendCommand(CMD_DLSTART); // a new list of commands, pointer location == 1
 		////////	 	FT81x_SendCommand(CLEAR(1,0,0));
 		//draw display
 		//see screen1demo (s1demo.cpp) for detailed comments
 
-		// switch (screen_num)
-		// {
-		// 	case 0: gaugePage1(); break;	// gauges w/ can data
-		// 	case 1: textPage1(); break;  	// text
-		// 	//case 2: demoPage(pos); break; 	// gauges w/ fake data
-		// }
+		switch (screen_num)
+		{
+		case 0:
+			if (staticRendered == 0)
+				gDrawStaticPg1();
+			break; // gauges w/ can data
+		case 1:
+			textPage1();
+			break; // text
+				   //case 2: demoPage(pos); break; 	// gauges w/ fake data
+		}
 		// gCLT.cx = 400;
 		// gCLT.cy = 166;
 		// gCLT.value_end = 260;
 		//	gCLT.value = ((msCAN_S16(msCAN_Data[adrgCLT].S16[0]) - 40) * 9 / 5) + 32;
 		//gCLT.drawGauge();  // draws gauge minus needle and digital value
-
-		FT81x_SendCommand(CMD_APPEND);  // draws needle and digital value
-		FT81x_SendCommand(3000L);
-		FT81x_SendCommand(dlSize);
-		float MPH = msCAN_S16(msCAN_Data[adrSpeed].S16[0]);		// get CAN bus value 
-		gMPH.setValue(MPH);
-		float RPM = msCAN_S16(msCAN_Data[adrRPM].S16[0]);
-		gRPM.setValue(RPM);
-		float CLT = ((msCAN_S16(msCAN_Data[adrCoolantT].S16[0]) - 40) * 9 / 5) + 32;
-		gCLT.setValue(CLT);											  
-		float CLP = msCAN_S16(msCAN_Data[adrCoolantP].S16[0]) * 0.1f; 
-		gCLP.setValue(CLP);											 
-		float OILP = msCAN_S16(msCAN_Data[adrOilPres].U08[0]);
-		gOILP.setValue(OILP);
-
-		FT81x_SendCommand(DISPLAY()); 	// fifo an end-of-commands marker
-		FT81x_SendCommand(CMD_SWAP);	// disp new list
-		FT81x_UpdateFIFO(); 			// start excuting the commands in the FIFO.
+		if (screen_num == 0)
+		{
+			FT81x_SendCommand(CMD_APPEND); // draws needle and digital value
+			FT81x_SendCommand(3000L);
+			FT81x_SendCommand(dlSize);
+			float MPH = msCAN_S16(msCAN_Data[adrSpeed].S16[0]); // get CAN bus value
+			gMPH.setValue(MPH);
+			float RPM = msCAN_S16(msCAN_Data[adrRPM].S16[0]);
+			gRPM.setValue(RPM);
+			float CLT = ((msCAN_S16(msCAN_Data[adrCoolantT].S16[0]) - 40) * 9 / 5) + 32;
+			gCLT.setValue(CLT);
+			float CLP = msCAN_S16(msCAN_Data[adrCoolantP].S16[0]) * 0.1f;
+			gCLP.setValue(CLP);
+			float OILP = msCAN_S16(msCAN_Data[adrOilPres].U08[0]);
+			gOILP.setValue(OILP);
+		}
+		FT81x_SendCommand(DISPLAY()); // fifo an end-of-commands marker
+		FT81x_SendCommand(CMD_SWAP);  // disp new list
+		FT81x_UpdateFIFO();			  // start excuting the commands in the FIFO.
 
 		//debounce
 		if (!touch_check && touched)
@@ -184,7 +191,9 @@ void core()
 		{
 			//no longer touched, but was on last loop = touched and released
 			//rotate screens
+			staticRendered = 0;
 			screen_num++; //flip screens if display was touched
+
 			if (screen_num >= SCREENS)
 				screen_num = 0;
 			//reset
@@ -200,7 +209,7 @@ void core()
 			DPRINT("\n");
 			pos = 0;
 		}
-		toc
+		// toc
 	}
 }
 
@@ -209,7 +218,6 @@ void setup()
 	setCpuFrequencyMhz(240); // max = 240MHz
 	Serial.begin(115200);	 // for debug
 	DPRINT("\n\nSETUP STARTED\n");
-
 	msCAN_Init(); //can setup
 
 	DPRINT("LCD SETUP\n");
@@ -220,22 +228,21 @@ void setup()
 	DPRINTF("SPI-CLK=%d\n", spiClockDivToFrequency(SPI.getClockDivider()));
 	DPRINT("SETUP DONE\n");
 
-	FT81x_SendCommand(CMD_DLSTART); // a new list of commands, pointer location == 1
-	FT81x_SendCommand(CLEAR_COLOR_RGB(0, 0, 0));  // init screen to black
+	FT81x_SendCommand(CMD_DLSTART);				 // a new list of commands, pointer location == 1
+	FT81x_SendCommand(CLEAR_COLOR_RGB(0, 0, 0)); // init screen to black
 	FT81x_SendCommand(CLEAR(1, 1, 1));
-	gMPH.drawGauge();				// draw gauges minus needle and digital value
-	gRPM.drawGauge();
-	gCLT.drawGauge(); 
-	gCLP.drawGauge();
-	gOILP.drawGauge();
+	staticRendered = gDrawStaticPg1(); // draw gauges minus needle and digital value
+	// gMPH.drawGauge();
+	// gRPM.drawGauge();
+	// gCLT.drawGauge();
+	// gCLP.drawGauge();
+	// gOILP.drawGauge();
 	FT81x_UpdateFIFO();
-	FT81x_FIFO_WaitUntilEmpty(); // wait for coproc to finish. We have created the static image 							
+	FT81x_FIFO_WaitUntilEmpty();			  // wait for coproc to finish. We have created the static image
 	dlSize = FT81x_R16(RAM_REG + REG_CMD_DL); // Copy this DL into RAM_G instead of sending over SPI each time
 	FT81x_Memcpy(3000L, RAM_DL, dlSize);	  // dest, src, cnt. copy DL to GL
-
-	//DPRINTF("dlSize=%d\n", dlSize); // 0d448 for one dial
-
-	core(); //main loop
+	DPRINTF("dlSize=%d\n", dlSize);			  // 0d448 for one dial
+	core();									  //main loop
 }
 
 void loop(void)
