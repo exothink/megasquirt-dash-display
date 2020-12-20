@@ -45,7 +45,8 @@ void msCAN_Init(void)
 
 	//init can
 	memset(msCAN_Data, 0x00, MSCAN_LEN * sizeof(ms3_8b_t));
-	CAN0.begin(250000); // CAN data rate
+	// CAN0.begin(250000); // CAN data rate
+	CAN0.begin(CANBR); // CAN data rate  
 	CAN0.watchFor();
 
 	//first check

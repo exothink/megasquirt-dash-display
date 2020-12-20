@@ -81,7 +81,7 @@ void gaugePage1(void)
 		0, 80,
 		3,
 		10, 80, 2,
-		5, 85, 0.8,
+		1, 85, 0.8,
 		65, "%0.0f", 1, 26,
 		2.5, OILP,
 		"OIL-P", 28,
@@ -94,8 +94,6 @@ void gaugePage1(void)
 	float CLT = ((msCAN_S16(msCAN_Data[adrCoolantT].S16[0]) - 40) * 9 / 5) + 32;  //ok
 	Gauge_RDial(
 		255,370, 100, 		// x,y, radius
-	//	0, 270,				// start, end angle
-	  //  -160, 110,
 	    180.0f, 90.0f, //angle
 		coolantT.zone[zone0], coolantT.zone[zone3],  // start, end vals
 		3,					// circle weight

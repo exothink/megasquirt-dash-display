@@ -23,7 +23,9 @@ public:
 				 float major_num_radius, const char *major_format, float major_multiplier, uint8_t major_font,
 				 float dial_weight, float value,
 				 const char *gauge_name_label, uint8_t gauge_label_font,
-				 const char *value_format, float value_multiplier, uint8_t value_font);
+				 const char *value_format, float value_multiplier, uint8_t value_font,
+                 dialFace properties
+                 );
     void drawGauge();
     void setValue(float val);
 
@@ -62,13 +64,19 @@ public:
     float value_multiplier = 1;
     uint8_t value_font = 29;
 
+    dialFace properties;
+
     char tf[16]; //value text buffer
     
     void point_at(float cx, float cy, float radius, float angle);
     void radial_line(float cx, float cy, float start_rad, float end_rad, float angle); // angle in degrees
     void angular_line(float cx, float cy, float radius, float start_angle, float end_angle);
     void text_at(float cx, float cy, float radius, float angle, uint8_t font, char *text);
-    
+
+   // #define COLOR_RGB(red,green,blue) ((4UL<<24)|(((red)&255UL)<<16)|(((green)&255UL)<<8)|(((blue)&255UL)<<0))
+    private:
+    float angle;
+    float incr_angle;
 
  };
 

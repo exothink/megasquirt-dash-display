@@ -17,7 +17,8 @@
 				 float _major_num_radius, const char *_major_format, float _major_multiplier, uint8_t _major_font,
 				 float _dial_weight, float _value,
 				 const char *_gauge_name_label, uint8_t _gauge_label_font,
-				 const char *_value_format, float _value_multiplier, uint8_t _value_font)
+				 const char *_value_format, float _value_multiplier, uint8_t _value_font,
+				 dialFace _properties)
 				 {
 					  cx = _cx;  cy = _cy;  circle_radius = _circle_radius;
 					  angle_start = _angle_start; angle_end = _angle_end;
@@ -29,6 +30,7 @@
 					  dial_weight = _dial_weight; value = _value;
 					  gauge_name_label = _gauge_name_label;  gauge_label_font = _gauge_label_font;
 					  value_format = _value_format, value_multiplier = _value_multiplier, value_font = _value_font;
+					  properties = _properties;
 				 }		
 
 void exoGauge::point_at(float cx, float cy, float radius, float angle)
@@ -84,7 +86,21 @@ void exoGauge::text_at(float cx, float cy, float radius, float angle, uint8_t fo
 				 float major_num_radius, const char *major_format, float major_multiplier, uint8_t major_font,
 				 float dial_weight, float value,
 				 const char *gauge_name_label, uint8_t gauge_label_font,
-				 const char *value_format, float value_multiplier, uint8_t value_font) */
+				 const char *value_format, float value_multiplier, uint8_t value_font,
+				 dialFace props) 
+
+				struct dialFace
+				{
+				uint8_t tag;
+				const char *title[1]; // no other syntax works -> *title[1];
+				const char *units[1];
+				// uint8_t num;      // number of zones, 3 max
+				int16_t zone[4];  // zone start and stop values, zone[0] = dialMin, zone[3] = dialMax
+				rgb zoneColor[3]; // zone colors for analog dial
+				int8_t width[3];  // line width of zone
+				rgb digiColor[3]; // zone colors for digital readout
+				};
+*/
 void exoGauge::drawGauge()
 {
 	//create a custom gauge background
@@ -109,27 +125,28 @@ void exoGauge::drawGauge()
 	FT81x_SendCommand(VERTEX2F(cx * 16, cy * 16)); // smaller black dot
 	FT81x_SendCommand(COLOR_RGB(255, 255, 255));
 
-	//minor ticks
-	float incr_angle = (angleRng / (value_end - value_start)) * minor_spacing;
-	float angle = angle_start;
-	FT81x_SendCommand(BEGIN(LINES));
-	FT81x_SendCommand(LINE_WIDTH((uint16_t)(minor_width * 16)));
-	for (angle = angle_start; angle <= angle_end; angle += incr_angle)
-		radial_line(cx, cy, minor_iradius, circle_radius - circle_weight - 1, angle); // angle in degrees
+	// //minor ticks
+	// float incr_angle = (angleRng / (value_end - value_start)) * minor_spacing;
+	// float angle = angle_start;
+	// FT81x_SendCommand(BEGIN(LINES));
+	// FT81x_SendCommand(LINE_WIDTH((uint16_t)(minor_width * 16)));
+	// for (angle = angle_start; angle <= angle_end; angle += incr_angle)
+	// 	radial_line(cx, cy, minor_iradius, circle_radius - circle_weight - 1, angle); // angle in degrees
 
 	//zones
-	if (cx == 255) // cl-t gauge
+	for (size_t i = 0; i < 3; i++)
 	{
-		float zValue_start = coolantT.zone[zone1];
-		float zValue_end = coolantT.zone[zone2];
+		float zValue_start = properties.zone[i];
+		float zValue_end = properties.zone[i+1];
 
 		float angleStart = angle_start + ((angle_end - angle_start) / (value_end - value_start)) * (zValue_start);
 		float angleStop = angle_start + ((angle_end - angle_start) / (value_end - value_start)) * (zValue_end);
-		incr_angle = ((angle_end - angle_start) / (value_end - value_start)) * minor_spacing;
-		FT81x_SendCommand(COLOR_RGB(255, 0, 0));
+	//	incr_angle = ((angle_end - angle_start) / (value_end - value_start)) * minor_spacing;
+	//	 FT81x_SendCommand(COLOR_RGB(255, 0, 0));
+		FT81x_SendCommand(COLOR_RGB(properties.zoneColor[i].r, properties.zoneColor[i].g, properties.zoneColor[i].b));
 		FT81x_SendCommand(BEGIN(LINE_STRIP));
-		FT81x_SendCommand(LINE_WIDTH((uint16_t)(minor_width * 16 * 4)));
-		for (angle = angleStart; angle <= angleStop; angle += incr_angle) // stitch an arc
+		FT81x_SendCommand(LINE_WIDTH((uint16_t)(properties.width[i] * 16)));
+		for (float angle = angleStart; angle <= angleStop; angle += 5) // stitch an arc
 		{
 			float r = (angle / 360.0f) * 2 * PI;
 			float dx = ((circle_radius - (circle_weight * 2)) * cos(r)) + cx;
@@ -137,10 +154,19 @@ void exoGauge::drawGauge()
 			FT81x_SendCommand(VERTEX2F(((int)dx) * 16, ((int)dy) * 16));
 		}
 	}
+
+	//minor ticks
+	incr_angle = (angleRng / (value_end - value_start)) * minor_spacing;
+	angle = angle_start;
+	FT81x_SendCommand(COLOR_RGB(255, 255, 255));
+	FT81x_SendCommand(BEGIN(LINES));
+	FT81x_SendCommand(LINE_WIDTH((uint16_t)(minor_width * 16)));
+	for (angle = angle_start; angle <= angle_end; angle += incr_angle)
+		radial_line(cx, cy, minor_iradius, circle_radius - circle_weight - 1, angle); // angle in degrees
+
 	//major ticks
 	incr_angle = (angleRng / (value_end - value_start)) * major_spacing;
 	angle = angle_start;
-	FT81x_SendCommand(COLOR_RGB(255, 255, 255));
 	FT81x_SendCommand(BEGIN(LINES));
 	FT81x_SendCommand(LINE_WIDTH((uint16_t)(major_width * 16)));
 	for (angle = angle_start; angle <= angle_end + 1; angle += incr_angle)
@@ -158,7 +184,7 @@ void exoGauge::drawGauge()
 
 	//gauge label
 	if (gauge_name_label[0] != 0)
-		FT81x_Text(cx, cy - (circle_radius / 4), gauge_label_font, OPT_CENTER, gauge_name_label);
+		FT81x_Text(cx, cy - (circle_radius / 4), gauge_label_font, OPT_CENTER, properties.title[0]);
 
 	// //value text ````````````````````````````````````````````````````````````````````
 	// if (value_format[0] != 0)
@@ -193,11 +219,7 @@ void exoGauge::drawGauge()
 	float ccsize = (dial_weight * 3) * 16;
 	FT81x_SendCommand(POINT_SIZE((uint8_t)ccsize));
 	FT81x_SendCommand(VERTEX2F(cx * 16, cy * 16));
-	// // FT81x_SendCommand(COLOR_RGB(0, 0, 0));  						// this blacks out center dot
-	// // FT81x_SendCommand(POINT_SIZE((uint8_t)(ccsize - (dial_weight * 16))));
-	// // FT81x_SendCommand(VERTEX2F(cx * 16, cy * 16));
-	// // FT81x_SendCommand(COLOR_RGB(255, 255, 255));
-	// //````````````````````````````````````````````````````````````````````````````````````````
+	//````````````````````````````````````````````````````````````````````````````````````````
 }
 
 void exoGauge::setValue(float value)
