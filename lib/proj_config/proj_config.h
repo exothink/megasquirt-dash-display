@@ -71,7 +71,7 @@ const rgb aqua = {0, 255, 255};
 const rgb blk = {0, 0, 0};
 const rgb blu = {0, 0, 255};
 const rgb grn = {0, 255, 0};
-const rgb red = {255, 0, 0};
+const rgb red = {255, 75, 75};
 const rgb wht = {255, 255, 255};
 const rgb yel = {255, 255, 0};
 
@@ -87,16 +87,16 @@ struct dialFace
   rgb digiColor[3]; // zone colors for digital readout
 };
 
-const dialFace auxBat = {1, "Aux Batt", "v", {0, 13, 15, 16}, {red, aqua, red}, {1, 2, 1}, {red, grn, red}};
-const dialFace battery = {2, "BATT", "v", {0, 12.2, 14.5, 15}, {red, aqua, red}, {1, 2, 1}, {red, grn, red}};  // 11.5, 12.0, 14.5, 15.0
-const dialFace headT = {3, "CHT", "f", {85, 215, 325, 325}, {aqua, red, blk}, {1, 3, 0}, {grn, red, blk}};
-const dialFace coolantT = {4, "CL-T", "f", {0, 210, 250, 270}, {aqua, yel, red}, {2, 3, 3}, {grn, red, blk}};
-const dialFace coolantP = {5, "CL-P", "#", {0, 5, 10, 15}, {red, aqua, red}, {2, 2, 2}, {red, grn, red}};
-const dialFace fuelPres = {6, "FUEL-P", "#", {0, 27, 32, 40}, {red, aqua, red}, {1, 2, 1}, {red, grn, red}};
-const dialFace fuelGal = {7, "FUEL-G", "G", {0, 2, 3, 16}, {red, yel, aqua}, {3, 2, 1}, {red, yel, grn}};
-const dialFace oilPres = {8, "OIL-P", "#", {20, 45, 55, 60}, {red, grn, red}, {3, 2, 3}, {red, grn, red}};
-const dialFace rpm = {9, "RPM", "", {0, 6000, 7300, 8000}, {aqua, yel, red}, {1, 3, 3}, {grn, yel, red}};
-const dialFace speed = {10, "MPH", "", {0, 80, 120, 120}, {aqua, yel, blk}, {1, 3, 0}, {grn, yel, blk}};
+const dialFace auxBat = {1, "Aux Batt", "v", {0, 13, 15, 16}, {red, blk, red}, {1, 2, 1}, {red, grn, red}};
+const dialFace battery = {2, "BATT", "v", {0, 12.2, 14.5, 15}, {red, blk, red}, {1, 2, 1}, {red, grn, red}};  // 11.5, 12.0, 14.5, 15.0
+const dialFace headT = {3, "CHT", "f", {85, 215, 325, 325}, {blk, red, blk}, {1, 3, 0}, {grn, red, blk}};
+const dialFace coolantT = {4, "CL-T", "f", {0, 210, 250, 270}, {blk, yel, red}, {2, 3, 3}, {grn, yel, red}};
+const dialFace coolantP = {5, "CL-P", "#", {0, 5, 10, 15}, {red, blk, red}, {2, 2, 2}, {red, grn, red}};
+const dialFace fuelPres = {6, "FUEL-P", "#", {0, 27, 32, 40}, {red, blk, red}, {1, 2, 1}, {red, grn, red}};
+const dialFace fuelGal = {7, "FUEL-G", "G", {0, 2, 3, 16}, {red, yel, blk}, {3, 2, 1}, {red, yel, grn}};
+const dialFace oilPres = {8, "OIL-P", "#", {20, 45, 55, 60}, {red, blk, red}, {3, 2, 3}, {red, grn, red}};
+const dialFace rpm = {9, "RPM", "", {0, 6000, 7300, 8000}, {blk, yel, red}, {1, 3, 3}, {grn, yel, red}};
+const dialFace speed = {10, "MPH", "", {0, 80, 120, 120}, {blk, yel, blk}, {1, 3, 0}, {grn, yel, blk}};
 
 
 // // Horizontal timing (minimum values from ILI6122_SPEC_V008.pdf page 45)

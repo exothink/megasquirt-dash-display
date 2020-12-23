@@ -40,7 +40,7 @@ exoGauge gMPH(
 	65, "%0.0f", 1, 26,
 	2.5, 0,
 	"MPH", 28,
-	"%0.0f", 1, 29,
+	"%0.0f", 1, 30,
     speed);
 
 exoGauge gRPM(
@@ -53,7 +53,7 @@ exoGauge gRPM(
 	65, "%0.0f", 0.001, 26,
 	2.5, 0,
 	"RPM", 28,
-	"%0.0f", 1, 29,
+	"%0.0f", 1, 30,
     rpm);
 
 exoGauge gCLT(									// Coolant Temp
@@ -66,7 +66,7 @@ exoGauge gCLT(									// Coolant Temp
 	65, "%0.0f", 1, 26,							// major_num_radius, major_format, multiplier, major_font
 	2.5, 210,									// dial_weight, float value
 	"CL-T", 28,									// gauge_name_label, gauge_label_font
-	"%0.0f", 1, 29,								// value_format, value_multiplier, value_font
+	"%0.0f", 1, 30,								// value_format, value_multiplier, value_font
     coolantT);
 
 exoGauge gCLP( // Coolant Pressure
@@ -79,7 +79,7 @@ exoGauge gCLP( // Coolant Pressure
 	65, "%0.0f", 1, 26,
 	2.5, 0, // 2.5, CLP,
 	"CL-P", 28,
-	"%0.1f", 1, 29,
+	"%0.1f", 1, 30,
     coolantP);
 
 exoGauge gOILP( //Oil Pressure
@@ -92,7 +92,7 @@ exoGauge gOILP( //Oil Pressure
 	65, "%0.0f", 1, 26,
 	2.5, 0,
 	"OIL-P", 28,
-	"%0.0f", 1, 29,
+	"%0.0f", 1, 30,
     oilPres);
 
 int gDrawStaticPg1()

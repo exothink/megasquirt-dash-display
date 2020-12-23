@@ -79,8 +79,8 @@ void core()
 			break;			// and updates vals of gauges with CAN data
 		case 1:
 			textPage1();
-			break; // text
-				   //case 2: demoPage(pos); break; 	// gauges w/ fake data
+			break;
+			//case 2: demoPage(pos); break; 	// gauges w/ fake data
 		}
 
 		//	if (screen_num == 0)

@@ -24,8 +24,7 @@ public:
 				 float dial_weight, float value,
 				 const char *gauge_name_label, uint8_t gauge_label_font,
 				 const char *value_format, float value_multiplier, uint8_t value_font,
-                 dialFace properties
-                 );
+         dialFace properties);
     void drawGauge();
     void setValue(float val);
 

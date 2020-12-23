@@ -5,33 +5,47 @@
 #include "exoGauge.h"
 
 //static const float pi = 3.1415926535f;
- exoGauge::exoGauge()
- {}
+exoGauge::exoGauge()
+{
+}
 
- exoGauge::exoGauge(uint16_t _cx, uint16_t _cy, uint16_t _circle_radius,
-				 float _angle_start, float _angle_end,
-				 float _value_start, float _value_end,
-				 uint8_t _circle_weight,
-				 float _major_spacing, float _major_iradius, float _major_width,
-				 float _minor_spacing, float _minor_iradius, float _minor_width,
-				 float _major_num_radius, const char *_major_format, float _major_multiplier, uint8_t _major_font,
-				 float _dial_weight, float _value,
-				 const char *_gauge_name_label, uint8_t _gauge_label_font,
-				 const char *_value_format, float _value_multiplier, uint8_t _value_font,
-				 dialFace _properties)
-				 {
-					  cx = _cx;  cy = _cy;  circle_radius = _circle_radius;
-					  angle_start = _angle_start; angle_end = _angle_end;
-					  value_start = _value_start; value_end = _value_end;
-					  circle_weight = _circle_weight;
-					  major_spacing = _major_spacing; major_iradius = _major_iradius; major_width = _major_width;
-					  minor_spacing = _minor_spacing; minor_iradius = _minor_iradius; minor_width = _minor_width;
-					  major_num_radius = _major_num_radius; major_format = _major_format; major_multiplier = _major_multiplier; major_font = _major_font;
-					  dial_weight = _dial_weight; value = _value;
-					  gauge_name_label = _gauge_name_label;  gauge_label_font = _gauge_label_font;
-					  value_format = _value_format, value_multiplier = _value_multiplier, value_font = _value_font;
-					  properties = _properties;
-				 }		
+exoGauge::exoGauge(uint16_t _cx, uint16_t _cy, uint16_t _circle_radius,
+				   float _angle_start, float _angle_end,
+				   float _value_start, float _value_end,
+				   uint8_t _circle_weight,
+				   float _major_spacing, float _major_iradius, float _major_width,
+				   float _minor_spacing, float _minor_iradius, float _minor_width,
+				   float _major_num_radius, const char *_major_format, float _major_multiplier, uint8_t _major_font,
+				   float _dial_weight, float _value,
+				   const char *_gauge_name_label, uint8_t _gauge_label_font,
+				   const char *_value_format, float _value_multiplier, uint8_t _value_font,
+				   dialFace _properties)
+{
+	cx = _cx;
+	cy = _cy;
+	circle_radius = _circle_radius;
+	angle_start = _angle_start;
+	angle_end = _angle_end;
+	value_start = _value_start;
+	value_end = _value_end;
+	circle_weight = _circle_weight;
+	major_spacing = _major_spacing;
+	major_iradius = _major_iradius;
+	major_width = _major_width;
+	minor_spacing = _minor_spacing;
+	minor_iradius = _minor_iradius;
+	minor_width = _minor_width;
+	major_num_radius = _major_num_radius;
+	major_format = _major_format;
+	major_multiplier = _major_multiplier;
+	major_font = _major_font;
+	dial_weight = _dial_weight;
+	value = _value;
+	gauge_name_label = _gauge_name_label;
+	gauge_label_font = _gauge_label_font;
+	value_format = _value_format, value_multiplier = _value_multiplier, value_font = _value_font;
+	properties = _properties;
+}
 
 void exoGauge::point_at(float cx, float cy, float radius, float angle)
 {
@@ -137,12 +151,12 @@ void exoGauge::drawGauge()
 	for (size_t i = 0; i < 3; i++)
 	{
 		float zValue_start = properties.zone[i];
-		float zValue_end = properties.zone[i+1];
+		float zValue_end = properties.zone[i + 1];
 
 		float angleStart = angle_start + ((angle_end - angle_start) / (value_end - value_start)) * (zValue_start);
 		float angleStop = angle_start + ((angle_end - angle_start) / (value_end - value_start)) * (zValue_end);
-	//	incr_angle = ((angle_end - angle_start) / (value_end - value_start)) * minor_spacing;
-	//	 FT81x_SendCommand(COLOR_RGB(255, 0, 0));
+		//	incr_angle = ((angle_end - angle_start) / (value_end - value_start)) * minor_spacing;
+		//	 FT81x_SendCommand(COLOR_RGB(255, 0, 0));
 		FT81x_SendCommand(COLOR_RGB(properties.zoneColor[i].r, properties.zoneColor[i].g, properties.zoneColor[i].b));
 		FT81x_SendCommand(BEGIN(LINE_STRIP));
 		FT81x_SendCommand(LINE_WIDTH((uint16_t)(properties.width[i] * 16)));
@@ -186,34 +200,6 @@ void exoGauge::drawGauge()
 	if (gauge_name_label[0] != 0)
 		FT81x_Text(cx, cy - (circle_radius / 4), gauge_label_font, OPT_CENTER, properties.title[0]);
 
-	// //value text ````````````````````````````````````````````````````````````````````
-	// if (value_format[0] != 0)
-	// {
-	// 	sprintf(tf, value_format, value_multiplier * value);
-	// 	FT81x_Text(cx, cy + (circle_radius / 4), value_font, OPT_CENTER, tf);
-	// }
-
-	// //dial (center dot)
-	// if (value > value_end) // keep needle between min and max
-	// 	value = value_end;
-	// if (value < value_start)
-	// 	value = value_start;
-	// value = value - value_start;
-	// float dangle = ((angle_end - angle_start) / (value_end - value_start)) * value; // y = (angleRng / valueRange)*x
-	// dangle += angle_start;										   // y = mx + b
-	// // if (dangle >= 360)je
-	// // 	dangle -= 360;
-	// // float
-	// // deltaDegrees = ((dangle - 90) / 360.0f) * 2 * PI;
-	// float deltaDegrees = ((dangle) / 360.0f) * 2 * PI;
-	// float dx = ((circle_radius - (circle_weight * 4)) * cos(deltaDegrees)) + cx; // abs x location on disp
-	// float dy = ((circle_radius - (circle_weight * 4)) * sin(deltaDegrees)) + cy; // abs y location on disp
-	// FT81x_SendCommand(COLOR_RGB(255, 255, 0));									 // of yellow needle tip
-	// FT81x_SendCommand(BEGIN(LINES));
-	// FT81x_SendCommand(LINE_WIDTH((uint8_t)(dial_weight * 16)));
-	// FT81x_SendCommand(VERTEX2F(cx * 16, cy * 16));					  // needle origin
-	// FT81x_SendCommand(VERTEX2F((int)(dx * 16.0f), (int)(dy * 16.0f))); // needle tip
-
 	// //center circle
 	FT81x_SendCommand(BEGIN(POINTS)); // draw center needle circle
 	float ccsize = (dial_weight * 3) * 16;
@@ -225,10 +211,23 @@ void exoGauge::drawGauge()
 void exoGauge::setValue(float value)
 {
 	//value text
+	// uint8_t bigger = 1;
+	int vColor;
 	if (value_format[0] != 0)
 	{
+		if (value >= properties.zone[0] && value < properties.zone[1])
+			vColor = 0;
+		else if (value >= properties.zone[1] && value < properties.zone[2])
+			vColor = 1;
+		else if (value >= properties.zone[2] && value < properties.zone[3])
+			vColor = 2;
+
+		FT81x_SendCommand(COLOR_RGB(properties.digiColor[vColor].r, properties.digiColor[vColor].g, properties.digiColor[vColor].b));
 		sprintf(tf, value_format, value_multiplier * value);
-		FT81x_Text(cx, cy + (circle_radius / 4), value_font, OPT_CENTER, tf);
+		if (properties.digiColor[vColor].r == red.r && properties.digiColor[vColor].g == red.g && properties.digiColor[vColor].b == red.b)
+			FT81x_Text(cx, cy + (circle_radius / 4), value_font + 1, OPT_CENTER, tf);
+		else
+			FT81x_Text(cx, cy + (circle_radius / 4), value_font, OPT_CENTER, tf);
 	}
 
 	//dial (center dot)
