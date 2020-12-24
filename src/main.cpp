@@ -25,6 +25,14 @@ https://github.com/exothink/megasquirt-dash-display								je 12/3/20
 	Flash: [==        ]  18.8% (used 246060 bytes from 1310720 bytes)
 	touch screen increments through the pages									12/17
 	zones are colored to reflect proj_config.h using "dialFace"	type			12/18
+	added shadows, digi vals with color, using config.h data					12/23
+	RAM:   [=         ]   5.3% (used 17388 bytes from 327680 bytes)
+	Flash: [==        ]  19.0% (used 249088 bytes from 1310720 bytes)
+	created macros:
+				COLOR_STRUCT(rgb)
+				COLOR_EQ(x,y)
+	sometimes the lcd doesn't restart.  Added time in 'EVE_Reset'.
+		300mS total as per ftdi AE			
 =========================================================================== */
 
 #include <Arduino.h>
@@ -45,13 +53,40 @@ uint32_t a;
 	Serial.print(micros() - a - 1); \
 	Serial.println("uS");
 
-//globals
+void core();
+uint16_t pos = 0;
 int staticRendered = 0;
 char _debugbuf[DPRINT_SIZE];
 
-void core()
+void setup()
 {
-	uint16_t pos = 0;
+	setCpuFrequencyMhz(240); // max = 240MHz
+	Serial.begin(921600);	 // for debug
+	//delay(5);				 // esp32 reset is intermittent without delay
+	DPRINT("\n\nSETUP STARTED\n");
+	msCAN_Init(); //can setup
+
+	DPRINT("LCD SETUP\n");
+	SPI_Setup(); //lcd io setup
+	FT81x_Init();
+	FT81x_SetBacklight(1); // 0 = off, 1 = dimmest, 128 = brightest
+	SPI_FullSpeed();	   // 20MHz, 30M with errors, 24M is ok. Increase SPI rate after init
+	DPRINTF("SPI-CLK=%d\n", spiClockDivToFrequency(SPI.getClockDivider()));
+	DPRINT("SETUP DONE\n");
+
+	FT81x_SendCommand(CMD_DLSTART);				 // a new list of commands, pointer location == 1
+	FT81x_SendCommand(CLEAR_COLOR_RGB(0, 0, 0)); // init screen to black
+	FT81x_SendCommand(CLEAR(1, 1, 1));			 //
+	staticRendered = gDrawStaticPg1();			 // draw gauges without needle and digital value
+	FT81x_UpdateFIFO();							 //
+	FT81x_FIFO_WaitUntilEmpty();				 // wait for coproc to finish. We have created the static image
+	dlSize = FT81x_R16(RAM_REG + REG_CMD_DL);	 // Copy this DL into RAM_G instead of sending over SPI each time
+	FT81x_Memcpy(3000L, RAM_DL, dlSize);		 // dest, src, cnt. copy DL to GL
+	DPRINTF("dlSize=%d\n", dlSize);				 // 0d448 for one dial
+}
+
+void loop(void)
+{
 	uint8_t touched = 0;
 	uint8_t touch_check = 0;
 	uint8_t screen_num = 0;
@@ -65,7 +100,7 @@ void core()
 
 	while (1)
 	{
-		// tic
+		//  tic
 
 		msCAN_Check(); // check for CAN data
 		touched = !(FT81x_R32(REG_CTOUCH_TOUCH_XY + RAM_REG) & 0x8000);
@@ -110,39 +145,7 @@ void core()
 			DPRINT("\n");
 			pos = 0;
 		}
+
 		// toc
 	}
-}
-
-void setup()
-{
-	setCpuFrequencyMhz(240); // max = 240MHz
-	Serial.begin(115200);	 // for debug
-	DPRINT("\n\nSETUP STARTED\n");
-	msCAN_Init(); //can setup
-
-	DPRINT("LCD SETUP\n");
-	SPI_Setup(); //lcd io setup
-	FT81x_Init();
-	FT81x_SetBacklight(1); // 0 = off, 1 = dimmest, 128 = brightest
-	SPI_FullSpeed();	   // 20MHz, 30M with errors, 24M is ok. Increase SPI rate after init
-	DPRINTF("SPI-CLK=%d\n", spiClockDivToFrequency(SPI.getClockDivider()));
-	DPRINT("SETUP DONE\n");
-
-	FT81x_SendCommand(CMD_DLSTART);				 // a new list of commands, pointer location == 1
-	FT81x_SendCommand(CLEAR_COLOR_RGB(0, 0, 0)); // init screen to black
-	FT81x_SendCommand(CLEAR(1, 1, 1));			 //
-	staticRendered = gDrawStaticPg1();			 // draw gauges without needle and digital value
-	FT81x_UpdateFIFO();							 //
-	FT81x_FIFO_WaitUntilEmpty();				 // wait for coproc to finish. We have created the static image
-	dlSize = FT81x_R16(RAM_REG + REG_CMD_DL);	 // Copy this DL into RAM_G instead of sending over SPI each time
-	FT81x_Memcpy(3000L, RAM_DL, dlSize);		 // dest, src, cnt. copy DL to GL
-	DPRINTF("dlSize=%d\n", dlSize);				 // 0d448 for one dial
-
-	core(); //main loop
-}
-
-void loop(void)
-{
-	//not used
 }

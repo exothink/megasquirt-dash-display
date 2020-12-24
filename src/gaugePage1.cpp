@@ -72,9 +72,6 @@ void gaugePage1(void)
 	//I have set this up as a generic input on sensor7
 	//sensor07 = scalar, S16,  116, "", 0.1000, 0.0
 	float OILP = msCAN_S16(msCAN_Data[adrOilPres].U08[0]);
-
-	//it's in KPA, convert to PSI
-	//OILP /= 6.895f;
 	Gauge_RDial(
 		690,220, 100,
 		0, 270,
@@ -106,14 +103,10 @@ void gaugePage1(void)
 	);
 
 	// //Coolant Pressure
-	// //I have set this up as a generic input on sensor9
-	// //sensor09 = scalar, S16,  120, "",   0.1000, 0.0
-	float CLP = msCAN_S16(msCAN_Data[adrCoolantP].S16[0]) * 0.1f;
-	//it's in KPA, convert to PSI
-	CLP /= 6.895f;
+	float CLP = msCAN_S16(msCAN_Data[adrCoolantP].U08[0]);
 	Gauge_RDial(
 		545,370, 100,
-		0, 270,
+		135, 45,
 		0, 25,
 		3,
 		5, 80, 2,

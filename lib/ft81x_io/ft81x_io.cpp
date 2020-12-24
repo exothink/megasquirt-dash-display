@@ -87,8 +87,8 @@ void SPI_Disable(void)
 //EVE hardware reset
 void EVE_Reset(void)
 {
-	digitalWrite(EVE2_PIN_PD, 0);
-	delay(50);
+	digitalWrite(EVE2_PIN_PD, 0);  // 300mS total as per ftdi AE
+	delay(150);
 	digitalWrite(EVE2_PIN_PD, 1);
 	delay(150);
 }

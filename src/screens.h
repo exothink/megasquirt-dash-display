@@ -58,7 +58,7 @@ exoGauge gRPM(
 
 exoGauge gCLT(									// Coolant Temp
 	255, 370, 100,								// x,y, radius
-	160, 90.0f,								// start, end angle
+	50, 340,										// start, end angle
 	coolantT.zone[zone0], coolantT.zone[zone3], // start, end vals    coolantT.zone[zone3]
 	3,											// circle weight
 	30, 80, 2,									// major spacing, iradius, width
@@ -71,7 +71,7 @@ exoGauge gCLT(									// Coolant Temp
 
 exoGauge gCLP( // Coolant Pressure
 	545, 370, 100,
-	0, 270,
+	135, 45,  // angles
 	0, 15,
 	3,
 	5, 80, 2,
@@ -84,7 +84,7 @@ exoGauge gCLP( // Coolant Pressure
 
 exoGauge gOILP( //Oil Pressure
 	690, 220, 100,
-	0, 270,
+	45, 315,
 	0, 60,
 	3,
 	10, 80, 2,
@@ -116,7 +116,7 @@ void updateGauges()
 			gRPM.setValue(RPM);
 			float CLT = ((msCAN_S16(msCAN_Data[adrCoolantT].S16[0]) - 40) * 9 / 5) + 32;
 			gCLT.setValue(CLT);
-			float CLP = msCAN_S16(msCAN_Data[adrCoolantP].S16[0]) * 0.1f;
+			float CLP = msCAN_S16(msCAN_Data[adrCoolantP].U08[0]) * 0.1f;
 			gCLP.setValue(CLP);
 			float OILP = msCAN_S16(msCAN_Data[adrOilPres].U08[0]);
 			gOILP.setValue(OILP);

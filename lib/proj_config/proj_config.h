@@ -17,24 +17,24 @@ Documents\PlatformIO\Projects\squirtDash\lib\proj_config\proj_config.h
 
 //project options
 #define NODEMCU_ESP32S
-#define CFAF800480E0_050SC_A1_1
 
 #define EVE2_PIN_INT (4)
-#define EVE2_PIN_PD (2)       //je works with Devkit v1 www.doit.am
+#define EVE2_PIN_PD (2) //je works with Devkit v1 www.doit.am
 #define EVE2_PIN_CS (5)
 #define SPI_SPEED (20000000L) // FT813 up to 30Mhz ideally,  24MHz max for my fly lead proto
 #define EVE2_WORKBUFSIZE (32)
 
 //display options
-#ifdef CFAF800480E0_050SC_A1_1
 #define FT813_ENABLE (1)
 #define EVE2_GT911 (1)
 
 // CAN
 #define BR250 250000
 #define BR500 500000
-#define CANBR BR250           // sets CAN data rate
 
+#define CANBR BR250     // sets CAN data rate
+#define MSCAN_BASE 0x60 // 1520  CAN  base address
+#define MSCAN_LEN EOA   // up to 64 total CAN addresses
 
 // gauge parms from VanaDash
 enum zoneIdx : uint8_t
@@ -47,7 +47,7 @@ enum zoneIdx : uint8_t
 
 enum measAdr : uint8_t // CAN Bus measurement addr (ID)
 {
-  adrAuxBat,
+  adrAuxBat, // 0x60
   adrBattery,
   adrHeadT,
   adrCoolantT,
@@ -71,7 +71,7 @@ const rgb aqua = {0, 255, 255};
 const rgb blk = {0, 0, 0};
 const rgb blu = {0, 0, 255};
 const rgb grn = {0, 255, 0};
-const rgb red = {255, 75, 75};
+const rgb red = {255, 0, 0}; //{255, 75, 75};
 const rgb wht = {255, 255, 255};
 const rgb yel = {255, 255, 0};
 
@@ -80,24 +80,22 @@ struct dialFace
   uint8_t tag;
   const char *title[1]; // no other syntax works -> *title[1];
   const char *units[1];
-  // uint8_t num;      // number of zones, 3 max
-  float zone[4];  // zone start and stop values, zone[0] = dialMin, zone[3] = dialMax
+  float zone[4];    // zone start and stop values, zone[0] = dialMin, zone[3] = dialMax
   rgb zoneColor[3]; // zone colors for analog dial
   int8_t width[3];  // line width of zone
   rgb digiColor[3]; // zone colors for digital readout
 };
 
 const dialFace auxBat = {1, "Aux Batt", "v", {0, 13, 15, 16}, {red, blk, red}, {1, 2, 1}, {red, grn, red}};
-const dialFace battery = {2, "BATT", "v", {0, 12.2, 14.5, 15}, {red, blk, red}, {1, 2, 1}, {red, grn, red}};  // 11.5, 12.0, 14.5, 15.0
+const dialFace battery = {2, "BATT", "v", {0, 12.2, 14.5, 15}, {red, blk, red}, {1, 2, 1}, {red, grn, red}}; // 11.5, 12.0, 14.5, 15.0
 const dialFace headT = {3, "CHT", "f", {85, 215, 325, 325}, {blk, red, blk}, {1, 3, 0}, {grn, red, blk}};
-const dialFace coolantT = {4, "CL-T", "f", {0, 210, 250, 270}, {blk, yel, red}, {2, 3, 3}, {grn, yel, red}};
-const dialFace coolantP = {5, "CL-P", "#", {0, 5, 10, 15}, {red, blk, red}, {2, 2, 2}, {red, grn, red}};
+const dialFace coolantT = {4, "CL-T", "f", {0, 210, 250, 270}, {blk, yel, red}, {2, 3, 5}, {grn, yel, red}};
+const dialFace coolantP = {5, "CL-P", "#", {0, 5, 10, 15}, {red, blk, red}, {5, 2, 5}, {red, grn, red}};
 const dialFace fuelPres = {6, "FUEL-P", "#", {0, 27, 32, 40}, {red, blk, red}, {1, 2, 1}, {red, grn, red}};
 const dialFace fuelGal = {7, "FUEL-G", "G", {0, 2, 3, 16}, {red, yel, blk}, {3, 2, 1}, {red, yel, grn}};
-const dialFace oilPres = {8, "OIL-P", "#", {20, 45, 55, 60}, {red, blk, red}, {3, 2, 3}, {red, grn, red}};
-const dialFace rpm = {9, "RPM", "", {0, 6000, 7300, 8000}, {blk, yel, red}, {1, 3, 3}, {grn, yel, red}};
+const dialFace oilPres = {8, "OIL-P", "#", {20, 45, 55, 60}, {red, blk, red}, {5, 2, 5}, {red, grn, red}};
+const dialFace rpm = {9, "RPM", "", {0, 6000, 7300, 8000}, {blk, yel, red}, {1, 3, 4}, {grn, yel, red}};
 const dialFace speed = {10, "MPH", "", {0, 80, 120, 120}, {blk, yel, blk}, {1, 3, 0}, {grn, yel, blk}};
-
 
 // // Horizontal timing (minimum values from ILI6122_SPEC_V008.pdf page 45)
 // #define HPX   (800)    // Horizontal Pixel Width
@@ -139,12 +137,11 @@ const dialFace speed = {10, "MPH", "", {0, 80, 120, 120}, {blk, yel, blk}, {1, 3
 #define EVE2_VOFFSET (VFP + VS + VBP)
 #define EVE2_VSYNC0 (VFP)
 #define EVE2_VSYNC1 (VFP + VS)
-#define EVE2_PCLK 2L          // 60MHz/EVE2_PCLK = 30MHz
+#define EVE2_PCLK 2L // 60MHz/EVE2_PCLK = 30MHz
 #define EVE2_SWIZZLE 0L
 #define EVE2_PCLK_POL 1L
 #define EVE2_CSPREAD 0L
 #define EVE2_DITHER 1L
-#endif
 
 //extra
 #define DPRINT_SIZE (64)

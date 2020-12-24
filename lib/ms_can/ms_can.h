@@ -12,10 +12,10 @@
 
 #include "proj_config.h"
 
-//MS CAN broadcast base address
-#define MSCAN_BASE			0x60// 1520
-//up to 64 following addresses
-#define MSCAN_LEN			EOA
+// //MS CAN broadcast base address
+// #define MSCAN_BASE			0x60// 1520
+// //up to 64 following addresses
+// #define MSCAN_LEN			EOA
 
 
 

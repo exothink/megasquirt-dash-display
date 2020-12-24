@@ -10,6 +10,9 @@
 #include <Arduino.h>
 #include "ft81x.h"
 
+#define COLOR_STRUCT(rgb) ((4UL<<24)|(((rgb.r)&255UL)<<16)|(((rgb.g)&255UL)<<8)|(((rgb.b)&255UL)<<0))
+#define COLOR_EQ(x,y) (((x.r)==(y.r))&&((x.g)==(y.g))&&((x.b) == (y.b)))
+
 class exoGauge
 {
 public:

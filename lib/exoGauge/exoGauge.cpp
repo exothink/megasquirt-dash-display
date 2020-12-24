@@ -128,15 +128,28 @@ void exoGauge::drawGauge()
 
 	//setup
 	FT81x_SendCommand(COLOR_A(255));
-	FT81x_SendCommand(COLOR_RGB(255, 255, 255));
+	//FT81x_SendCommand(COLOR_RGB(200, 255, 230));
+	// FT81x_SendCommand(COLOR_RGBx(red));
 
 	//major circle
 	FT81x_SendCommand(BEGIN(POINTS));
-	FT81x_SendCommand(POINT_SIZE(((uint16_t)circle_radius + 1) * 16)); // large white dot
+
+	FT81x_SendCommand(COLOR_RGB(115, 115, 115));
+	//FT81x_SendCommand(COLOR_RGBX(red));
+	FT81x_SendCommand(POINT_SIZE(((uint16_t)circle_radius + 1) * 16)); // shaddow 2
+	FT81x_SendCommand(VERTEX2F((cx * 16) + 130, (cy * 16) + 130));
+
+	FT81x_SendCommand(COLOR_RGB(85, 85, 100));
+	FT81x_SendCommand(POINT_SIZE(((uint16_t)circle_radius + 1) * 16)); // shaddow 1
+	FT81x_SendCommand(VERTEX2F((cx * 16) + 100, (cy * 16) + 100));
+	
+    FT81x_SendCommand(COLOR_RGB(255, 255, 255));
+	FT81x_SendCommand(POINT_SIZE(((uint16_t)circle_radius + 1) * 16)); // large ball, dial outer diameter
 	FT81x_SendCommand(VERTEX2F(cx * 16, cy * 16));
+
 	FT81x_SendCommand(COLOR_RGB(0, 0, 0));
 	FT81x_SendCommand(POINT_SIZE(((uint16_t)circle_radius - circle_weight - 1) * 16));
-	FT81x_SendCommand(VERTEX2F(cx * 16, cy * 16)); // smaller black dot
+	FT81x_SendCommand(VERTEX2F(cx * 16, cy * 16)); 						// smaller black dot, yields a circle from the ball
 	FT81x_SendCommand(COLOR_RGB(255, 255, 255));
 
 	// //minor ticks
@@ -157,14 +170,14 @@ void exoGauge::drawGauge()
 		float angleStop = angle_start + ((angle_end - angle_start) / (value_end - value_start)) * (zValue_end);
 		//	incr_angle = ((angle_end - angle_start) / (value_end - value_start)) * minor_spacing;
 		//	 FT81x_SendCommand(COLOR_RGB(255, 0, 0));
-		FT81x_SendCommand(COLOR_RGB(properties.zoneColor[i].r, properties.zoneColor[i].g, properties.zoneColor[i].b));
+		FT81x_SendCommand(COLOR_STRUCT(properties.zoneColor[i]));
 		FT81x_SendCommand(BEGIN(LINE_STRIP));
 		FT81x_SendCommand(LINE_WIDTH((uint16_t)(properties.width[i] * 16)));
 		for (float angle = angleStart; angle <= angleStop; angle += 5) // stitch an arc
 		{
 			float r = (angle / 360.0f) * 2 * PI;
-			float dx = ((circle_radius - (circle_weight * 2)) * cos(r)) + cx;
-			float dy = ((circle_radius - (circle_weight * 2)) * sin(r)) + cy;
+			float dx = ((circle_radius - (circle_weight + properties.width[i] + 1)) * cos(r)) + cx;
+			float dy = ((circle_radius - (circle_weight + properties.width[i] + 1)) * sin(r)) + cy;
 			FT81x_SendCommand(VERTEX2F(((int)dx) * 16, ((int)dy) * 16));
 		}
 	}
@@ -172,7 +185,7 @@ void exoGauge::drawGauge()
 	//minor ticks
 	incr_angle = (angleRng / (value_end - value_start)) * minor_spacing;
 	angle = angle_start;
-	FT81x_SendCommand(COLOR_RGB(255, 255, 255));
+	FT81x_SendCommand(COLOR_STRUCT(wht));
 	FT81x_SendCommand(BEGIN(LINES));
 	FT81x_SendCommand(LINE_WIDTH((uint16_t)(minor_width * 16)));
 	for (angle = angle_start; angle <= angle_end; angle += incr_angle)
@@ -211,52 +224,54 @@ void exoGauge::drawGauge()
 void exoGauge::setValue(float value)
 {
 	//value text
-	// uint8_t bigger = 1;
-	int vColor;
+	int vColor = 0;
 	if (value_format[0] != 0)
 	{
-		if (value >= properties.zone[0] && value < properties.zone[1])
+		if (value >= properties.zone[0] && value < properties.zone[1]) // digital readouts vary with zones
 			vColor = 0;
 		else if (value >= properties.zone[1] && value < properties.zone[2])
 			vColor = 1;
 		else if (value >= properties.zone[2] && value < properties.zone[3])
 			vColor = 2;
 
-		FT81x_SendCommand(COLOR_RGB(properties.digiColor[vColor].r, properties.digiColor[vColor].g, properties.digiColor[vColor].b));
+	 	
 		sprintf(tf, value_format, value_multiplier * value);
-		if (properties.digiColor[vColor].r == red.r && properties.digiColor[vColor].g == red.g && properties.digiColor[vColor].b == red.b)
+	if (COLOR_EQ(properties.digiColor[vColor], red))
+		{
+			FT81x_SendCommand(COLOR_STRUCT(yel));
+			FT81x_Text(cx + 2, cy + 1 + (circle_radius / 4), value_font + 1, OPT_CENTER, tf);
+			FT81x_SendCommand(COLOR_STRUCT(properties.digiColor[vColor]));
 			FT81x_Text(cx, cy + (circle_radius / 4), value_font + 1, OPT_CENTER, tf);
+		}
 		else
-			FT81x_Text(cx, cy + (circle_radius / 4), value_font, OPT_CENTER, tf);
+		{
+		FT81x_SendCommand(COLOR_STRUCT(properties.digiColor[vColor]));
+		FT81x_Text(cx, cy + (circle_radius / 4), value_font, OPT_CENTER, tf);
+		}
 	}
 
-	//dial (center dot)
+	//needle
 	if (value > value_end) // keep needle between min and max
 		value = value_end;
 	if (value < value_start)
 		value = value_start;
 	value = value - value_start;
-	// if (angle_start > angle_end) // je
-	// 	angle_start -= 360.0f;
+
 	float dangle = ((angle_end - angle_start) / (value_end - value_start)) * value; // y = (angleRng / valueRange)*x
 	dangle += angle_start;															// y = mx + b
-	// if (dangle >= 360)je
-	// 	dangle -= 360;
-	// float
-	// deltaDegrees = ((dangle - 90) / 360.0f) * 2 * PI;
 	float deltaDegrees = ((dangle) / 360.0f) * 2 * PI;
 	float dx = ((circle_radius - (circle_weight * 4)) * cos(deltaDegrees)) + cx; // abs x location on disp
 	float dy = ((circle_radius - (circle_weight * 4)) * sin(deltaDegrees)) + cy; // abs y location on disp
-	FT81x_SendCommand(COLOR_RGB(255, 255, 0));									 // of yellow needle tip
+	FT81x_SendCommand(COLOR_STRUCT(yel));									 // of yellow needle tip
 	FT81x_SendCommand(BEGIN(LINES));
 	FT81x_SendCommand(LINE_WIDTH((uint8_t)(dial_weight * 16)));
-	FT81x_SendCommand(VERTEX2F(cx * 16, cy * 16));					   // needle origin
-	FT81x_SendCommand(VERTEX2F((int)(dx * 16.0f), (int)(dy * 16.0f))); // needle tip
+	FT81x_SendCommand(VERTEX2F(cx * 16, cy * 16));				 // needle origin
+	FT81x_SendCommand(VERTEX2F((int)(dx * 16), (int)(dy * 16))); // needle tip
 
 	FT81x_SendCommand(BEGIN(POINTS)); // this blacks out center dot
 	float ccsize = (dial_weight * 3) * 16;
-	FT81x_SendCommand(COLOR_RGB(0, 0, 0));
+	FT81x_SendCommand(COLOR_STRUCT(wht));
 	FT81x_SendCommand(POINT_SIZE((uint8_t)(ccsize - (dial_weight * 16))));
 	FT81x_SendCommand(VERTEX2F(cx * 16, cy * 16));
-	FT81x_SendCommand(COLOR_RGB(255, 255, 255));
+	FT81x_SendCommand(COLOR_STRUCT(blk));
 }

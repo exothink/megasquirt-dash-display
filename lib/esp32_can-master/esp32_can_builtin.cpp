@@ -185,12 +185,12 @@ uint32_t ESP32CAN::init(uint32_t ul_baudrate)
 
     CAN_cfg.speed = (CAN_speed_t)(ul_baudrate / 1000);
     needReset = 0;
-    CAN_init();
+    return CAN_init();
 }
 
 uint32_t ESP32CAN::beginAutoSpeed()
 {
-
+    return 0;
 }
 
 uint32_t ESP32CAN::set_baudrate(uint32_t ul_baudrate)
@@ -198,7 +198,7 @@ uint32_t ESP32CAN::set_baudrate(uint32_t ul_baudrate)
     CAN_stop();
     CAN_cfg.speed = (CAN_speed_t)(ul_baudrate / 1000);
     needReset = 0;
-    CAN_init();
+    return CAN_init();
 }
 
 void ESP32CAN::setListenOnlyMode(bool state)
@@ -300,6 +300,8 @@ bool ESP32CAN::sendFrame(CAN_FRAME& txFrame)
     {
         CAN_write_frame(&__TX_frame);
     }
+
+    return true;
 }
 
 bool ESP32CAN::rx_avail()
