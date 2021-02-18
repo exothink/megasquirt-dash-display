@@ -32,7 +32,14 @@ https://github.com/exothink/megasquirt-dash-display								je 12/3/20
 				COLOR_STRUCT(rgb)
 				COLOR_EQ(x,y)
 	sometimes the lcd doesn't restart.  Added time in 'EVE_Reset'.
-		300mS total as per ftdi AE			
+		300mS total for reset as per ftdi AE
+
+	RAM:   [=         ]   5.3% (used 17364 bytes from 327680 bytes)				12/26
+	Flash: [==        ]  19.0% (used 249180 bytes from 1310720 bytes)
+	using initialzer list in exoGauge constructor	
+
+	added 'Tags' to screens														1/7/2021
+	added void FT81x_Romfont(uint32_t font, uint32_t romslot);  				1/13			
 =========================================================================== */
 
 #include <Arduino.h>
@@ -45,6 +52,7 @@ https://github.com/exothink/megasquirt-dash-display								je 12/3/20
 //#include "ledbar.h"
 #include "exoGauge.h"
 #include "screens.h"
+//#include "GD2.h"
 
 // execution time macro
 uint32_t a;
@@ -57,6 +65,7 @@ void core();
 uint16_t pos = 0;
 int staticRendered = 0;
 char _debugbuf[DPRINT_SIZE];
+//Poly po;
 
 void setup()
 {
@@ -76,6 +85,10 @@ void setup()
 
 	FT81x_SendCommand(CMD_DLSTART);				 // a new list of commands, pointer location == 1
 	FT81x_SendCommand(CLEAR_COLOR_RGB(0, 0, 0)); // init screen to black
+
+				FT81x_SendCommand(CLEAR_TAG(1));
+		//	FT81x_SendCommand(CLEAR(0, 0, 1));  // set tag
+	
 	FT81x_SendCommand(CLEAR(1, 1, 1));			 //
 	staticRendered = gDrawStaticPg1();			 // draw gauges without needle and digital value
 	FT81x_UpdateFIFO();							 //
@@ -115,7 +128,9 @@ void loop(void)
 		case 1:
 			textPage1();
 			break;
-			//case 2: demoPage(pos); break; 	// gauges w/ fake data
+		case 2: 
+			 timePage(); 
+			 break; 	
 		}
 
 		//	if (screen_num == 0)
@@ -140,8 +155,10 @@ void loop(void)
 		pos++;
 		if (pos > 100) // dummy gauge data for demo
 		{
-			DPRINT("LOOP100  ");
+			DPRINT("  LOOP100  ");
 			DPRINT(screen_num);
+			DPRINT("   tag  ");
+			DPRINT(FT81x_R32(REG_CTOUCH_TAG + RAM_REG));  // & 0x0000000f
 			DPRINT("\n");
 			pos = 0;
 		}

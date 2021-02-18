@@ -60,9 +60,12 @@ static void textDatai(uint16_t x, uint16_t y, int value, const char *label, cons
 
 void textPage1(void)
 {
-	FT81x_SendCommand(CLEAR(1, 1, 1));
+	FT81x_SendCommand(CLEAR_TAG(11));
+	FT81x_SendCommand(CLEAR(1, 0, 1));  // set tag
+//	FT81x_SendCommand(CLEAR(1, 1, 0));
 	//thin RPM bar
-	float RPM = msCAN_U16(msCAN_Data[adrRPM].U16[0]); //je
+	// float RPM = msCAN_U16(msCAN_Data[adrRPM].U16[0]); //je
+	float RPM = msCAN_Data[adrRPM].U16[0]; //je
 
 	Gauge_HDashBar(20, 10, 800 - 20, 40,
 				   4, 9,
@@ -84,51 +87,61 @@ void textPage1(void)
 	// textDatai(xPos, yPos += FONTHEIGHT, Seconds, "UpT:", "%d s", 30, 1, 65536, 65536);
 
 	//Aux Battery Voltage
-	float auxV = msCAN_U16(msCAN_Data[adrAuxBat].U08[0]) * 0.1f;
+	float auxV = msCAN_Data[adrAuxBat].U08[0] * 0.1f;
 	textDataf(xPos, yPos += FONTHEIGHT, auxV, "ABAT:", "%0.1f V", 11.5, auxBat.zone[1], auxBat.zone[2], 15.0);
 
 	//Battery Voltage
-	float BATTV = msCAN_S16(msCAN_Data[adrBattery].U08[0]) * 0.1f;
+	float BATTV = msCAN_Data[adrBattery].U08[0] * 0.1f;
 	textDataf(xPos, yPos += FONTHEIGHT, BATTV, "BATT:", "%0.1f V", 11.5, battery.zone[1], battery.zone[2], 15.0); // red, yel, yel, red
 
 	//Coolant Pressure
-	float CLPres = msCAN_S16(msCAN_Data[adrCoolantP].U08[0]) * 0.1f;
+	float CLPres = msCAN_Data[adrCoolantP].U08[0] * 0.1f;
 	textDataf(xPos, yPos += FONTHEIGHT, CLPres, "CLP:", "%0.1f psi", 0, coolantP.zone[1], coolantP.zone[3], coolantP.zone[2]);
 	//																y				r			y					r		0, 5, 10, 15
 	//Coolant Temperature (fahrenheit)
-	float CLT = ((msCAN_S16(msCAN_Data[adrCoolantT].S16[0]) - 40) * 9 / 5) + 32; //ok
+	float CLT = ((msCAN_Data[adrCoolantT].S16[0] - 40) * 9 / 5) + 32; //ok
 	textDataf(xPos, yPos += FONTHEIGHT, CLT, "CLT:", "%0.0f F", 0, 0, coolantT.zone[1], coolantT.zone[2]);
+
+	//Coolant Head Temperature (fahrenheit)
+	float CHT = ((msCAN_Data[adrHeadT].S16[0] - 40) * 9 / 5) + 32; //ok
+	textDataf(xPos, yPos += FONTHEIGHT, CHT, "CHT:", "%0.0f F", 0, 0, headT.zone[1], headT.zone[2]);
+
+	//OilPres
+    //    frames[OilPres].txMsg.bytes[0] = ((oilPresLim[Second] + oilPresLim[Third]) / 2) + (6 * (sin(2 * PI * millis() / 50000)));
+	float OilPres = msCAN_Data[adrOilPres].U08[0];
+	textDataf(xPos, yPos += FONTHEIGHT, OilPres, "OILP:", "%0.0f psi", 0, oilPres.zone[1], oilPres.zone[3], oilPres.zone[2]);
+	//																y				r			y					r		0, 5, 10, 15
 
 	//RPM
 	textDatai(xPos, yPos += FONTHEIGHT, RPM, "RPM:", "%d", 0, 0, rpm.zone[1], rpm.zone[2]);
 	//													<val=yel, 	<val=red, 	>val=yel, 		>val=red    else green
 
 	//MAP gauge
-	float MAP = msCAN_S16(msCAN_Data[2].S16[1]) * 0.1f;
+	float MAP = msCAN_Data[2].S16[1] * 0.1f;
 	textDataf(xPos, yPos += FONTHEIGHT, MAP, "MAP:", "%0.1f kPa", 5, 5, 240, 260);
 
 	//TPS
-	float TPS = msCAN_S16(msCAN_Data[3].S16[0]) * 0.1f;
+	float TPS = msCAN_Data[3].S16[0] * 0.1f;
 	textDataf(xPos, yPos += FONTHEIGHT, TPS, "TPS:", "%0.1f %%", -1, -20, 100, 500);
 
 	//AFR gauge
 	float EGO = msCAN_Data[3].U08[0] * 0.1f;
 	textDataf(xPos, yPos += FONTHEIGHT, EGO, "EGO:", "%0.1f AFR", 11, 10.5, 15.5, 17);
 
+	xPos = 460;	// next col
+	yPos = 20;
+
 	//Manifold Temperature (celcius)
-	float MAT = (msCAN_S16(msCAN_Data[2].S16[2]) - 320) * 0.05555f;
+	float MAT = (msCAN_Data[2].S16[2] - 320) * 0.05555f;
 	textDataf(xPos, yPos += FONTHEIGHT, MAT, "MAT:", "%0.0f C", 0, -10, 60, 80);
 
 	//Injector PW1
-	float PW1 = msCAN_U16(msCAN_Data[0].U16[1]) * 0.001f;
+	float PW1 = msCAN_Data[0].U16[1] * 0.001f;
 	textDataf(xPos, yPos += FONTHEIGHT, PW1, "PW1:", "%0.3f mS", 0.01, -10, 10, 11);
 
-	xPos = 460;	// next col
-	yPos = 20; 
-	
 	//Ignition Advance
 	//advance = scalar, S16,    8, "deg", 0.100, 0.0
-	float ADV = msCAN_S16(msCAN_Data[1].S16[0]) * 0.1f;
+	float ADV = msCAN_Data[1].S16[0] * 0.1f;
 	textDataf(xPos, yPos += FONTHEIGHT, ADV, "ADV:", "%0.1f deg", -50, -50, 50, 50);
 
 	//AFR Target
@@ -138,31 +151,31 @@ void textPage1(void)
 
 	//EGO Correction %
 	//egoCorrection1   = scalar, S16,   34, "%",   0.1000, 0.0
-	float EGOCOR = msCAN_S16(msCAN_Data[4].S16[1]) * 0.1f;
+	float EGOCOR = msCAN_Data[4].S16[1] * 0.1f;
 	textDataf(xPos, yPos += FONTHEIGHT, EGOCOR, "COR:", "%0.1f %%", 75, 85, 115, 125);
 
 	//Baro gauge
 	//barometer = scalar, S16,   16, "kPa", 0.100, 0.0
-	float BARO = msCAN_S16(msCAN_Data[2].S16[0]) * 0.1f;
+	float BARO = msCAN_Data[2].S16[0] * 0.1f;
 	textDataf(xPos, yPos += FONTHEIGHT, BARO, "BARO:", "%0.1f kpa", 5, 5, 240, 260);
 
 	//Boost Duty 1
 	//boostduty = scalar, U08,  139 , "%",  1.0, 0.0
 	//2,2,1,1,2
-	float BOOSTDTY = msCAN_S16(msCAN_Data[7].U08[4]) * 0.392f;
+	float BOOSTDTY = msCAN_Data[7].U08[4] * 0.392f;
 	textDataf(xPos, yPos += FONTHEIGHT, BOOSTDTY, "BST:", "%0.1f %%", -10, -10, 100, 100);
 
 	//Idle PWM %
 	//idleDC = scalar, S16,   54, "%",    0.392, 0.0
-	float IDLE = msCAN_S16(msCAN_Data[6].S16[3]) * 0.392f;
+	float IDLE = msCAN_Data[6].S16[3] * 0.392f;
 	textDataf(xPos, yPos += FONTHEIGHT, IDLE, "IDL:", "%0.1f %%", -10, -10, 100, 100);
 
 	//fuel tank
-	float fuelTank = msCAN_S16(msCAN_Data[adrFuelGal].U08[0]) * 0.1f;
+	float fuelTank = msCAN_Data[adrFuelGal].U08[0] * 0.1f;
 	textDataf(xPos, yPos += FONTHEIGHT, fuelTank, "FUEL:", "%0.1f Gal", fuelGal.zone[1], fuelGal.zone[1] - 1 , fuelGal.zone[3], fuelGal.zone[3]);
 	//																				0, 2, 3, 16
 	//fuel pump pressure
-	float fuelPSI = msCAN_S16(msCAN_Data[adrFuelPres].U08[0]) * 1.0f;
+	float fuelPSI = msCAN_Data[adrFuelPres].U08[0] * 1.0f;
 	textDataf(xPos, yPos += FONTHEIGHT, fuelPSI, "FP:", "%0.1f psi", fuelPres.zone[1], fuelPres.zone[1] - 5 , fuelPres.zone[2], fuelPres.zone[2] + 5);
 	//																	y	r	y	r		0, 27, 32, 40
 }

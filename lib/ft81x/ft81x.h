@@ -61,6 +61,7 @@ extern "C"
 #define CMD_PLAYVIDEO        0xFFFFFF3A
 #define CMD_PROGRESS         0xFFFFFF0F
 #define CMD_REGREAD          0xFFFFFF19
+#define CMD_ROMFONT          0xffffff3f  //je
 #define CMD_ROTATE           0xFFFFFF29
 #define CMD_SCALE            0xFFFFFF28
 #define CMD_SCREENSAVER      0xFFFFFF2F
@@ -331,6 +332,8 @@ extern uint16_t FT81x_FIFOLocation;  // end of last DL + 1
 // Function Prototypes
 void FT81x_Init(void);
 void FT81x_Reset(void);
+
+void FT81x_Romfont(uint32_t font, uint32_t romslot);  //je
 
 void FT81x_HostCommand(uint8_t command);
 void FT81x_W32(uint32_t address, uint32_t parameter);

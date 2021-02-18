@@ -19,8 +19,37 @@ exoGauge::exoGauge(uint16_t _cx, uint16_t _cy, uint16_t _circle_radius,
 				   float _dial_weight, float _value,
 				   const char *_gauge_name_label, uint8_t _gauge_label_font,
 				   const char *_value_format, float _value_multiplier, uint8_t _value_font,
-				   dialFace _properties)
-{
+				   const dialFace& _properties):
+					cx(_cx),						//initializer list
+					cy(_cy),
+					circle_radius(_circle_radius),
+					angle_start(_angle_start),
+					angle_end(_angle_end),
+					value_start(_value_start),
+					value_end(_value_end),
+					circle_weight(_circle_weight),
+					major_spacing(_major_spacing),
+					major_iradius(_major_iradius),
+					major_width(_major_width),
+					minor_spacing(_minor_spacing),
+					minor_iradius(_minor_iradius),
+					minor_width(_minor_width),
+					major_num_radius(_major_num_radius),
+					major_format(_major_format),
+					major_multiplier(_major_multiplier),
+					major_font(_major_font),
+					dial_weight(_dial_weight),
+					value(_value),
+					gauge_name_label(_gauge_name_label),
+					gauge_label_font(_gauge_label_font),
+					value_format(_value_format), 
+					value_multiplier(_value_multiplier), 
+					value_font(_value_font),
+					properties(_properties)  {};
+
+
+
+/* {
 	cx = _cx;
 	cy = _cy;
 	circle_radius = _circle_radius;
@@ -45,7 +74,7 @@ exoGauge::exoGauge(uint16_t _cx, uint16_t _cy, uint16_t _circle_radius,
 	gauge_label_font = _gauge_label_font;
 	value_format = _value_format, value_multiplier = _value_multiplier, value_font = _value_font;
 	properties = _properties;
-}
+} */
 
 void exoGauge::point_at(float cx, float cy, float radius, float angle)
 {

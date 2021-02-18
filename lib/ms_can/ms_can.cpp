@@ -69,50 +69,51 @@ void msCAN_Check(void)
 			memset(msCAN_Data[incoming.id - MSCAN_BASE].U08, 0x00, 8);
 			memcpy(msCAN_Data[incoming.id - MSCAN_BASE].U08, incoming.data.byte, incoming.length);
 
-		//	printFrame(&incoming); //debug output je
+			// if(incoming.id == 0x6a)
+			// printFrame(&incoming); //debug output je
 		}
 	}
 }
 
-uint16_t msCAN_U16(uint16_t in)
-{
-// #ifdef MSCAN_SWAPBYTES  !!!!!!!!!!!! marks error
-#if MSCAN_SWAPBYTES
-	return __builtin_bswap16(in);
-#else
-	return in;
-#endif
-}
+// uint16_t msCAN_U16(uint16_t in)
+// {
+// // #ifdef MSCAN_SWAPBYTES  !!!!!!!!!!!! marks error
+// #if MSCAN_SWAPBYTES
+// 	return __builtin_bswap16(in);
+// #else
+// 	return in;
+// #endif
+// }
 
-uint32_t msCAN_U32(uint32_t in)
-{
-#if MSCAN_SWAPBYTES
-	return __builtin_bswap32(in);
-#else
-	return in;
-#endif
-}
+// uint32_t msCAN_U32(uint32_t in)
+// {
+// #if MSCAN_SWAPBYTES
+// 	return __builtin_bswap32(in);
+// #else
+// 	return in;
+// #endif
+// }
 
-int16_t msCAN_S16(int16_t in)
-{
-#if MSCAN_SWAPBYTES
-	ms_16b t;
-	t.S = in;
-	t.U = __builtin_bswap16(t.U);
-	return t.S;
-#else
-	return in;
-#endif
-}
+// int16_t msCAN_S16(int16_t in)
+// {
+// #if MSCAN_SWAPBYTES
+// 	ms_16b t;
+// 	t.S = in;
+// 	t.U = __builtin_bswap16(t.U);
+// 	return t.S;
+// #else
+// 	return in;
+// #endif
+// }
 
-int32_t msCAN_S32(int32_t in)
-{
-#if MSCAN_SWAPBYTES
-	ms_32b t;
-	t.S = in;
-	t.U = __builtin_bswap32(t.U);
-	return t.S;
-#else
-	return in;
-#endif
-}
+// int32_t msCAN_S32(int32_t in)
+// {
+// #if MSCAN_SWAPBYTES
+// 	ms_32b t;
+// 	t.S = in;
+// 	t.U = __builtin_bswap32(t.U);
+// 	return t.S;
+// #else
+// 	return in;
+// #endif
+// }

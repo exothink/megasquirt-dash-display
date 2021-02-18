@@ -369,6 +369,13 @@ void FT81x_Translate(uint32_t tx, uint32_t ty)
 	FT81x_SendCommand(ty);
 }
 
+void FT81x_Romfont(uint32_t font, uint32_t romslot)  //je  1/13/21
+{
+	FT81x_SendCommand(CMD_ROMFONT);
+	FT81x_SendCommand(font);
+	FT81x_SendCommand(romslot);
+}
+
 void Cmd_Rotate(uint32_t a)
 {
 	FT81x_SendCommand(CMD_ROTATE);
@@ -485,7 +492,7 @@ void FT81x_CalibrateManual(uint16_t width, uint16_t height, uint16_t voffset, in
 
 void FT81x_SetBacklight(uint8_t brightness)
 {
-	FT81x_W8(REG_PWM_DUTY + RAM_REG, brightness);            // Backlight PWM duty (brightness)
+	FT81x_W8(REG_PWM_DUTY + RAM_REG, brightness);            // BACKLIGHT PWM output duty cycle 0=0%, 128=100%
 }
 
 uint16_t FT81x_FIFO_FreeSpace(void)

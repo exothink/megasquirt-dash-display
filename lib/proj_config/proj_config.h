@@ -17,12 +17,17 @@ Documents\PlatformIO\Projects\squirtDash\lib\proj_config\proj_config.h
 
 //project options
 #define NODEMCU_ESP32S
+#define DEVKIT_V1         //www.doit.com
 
+#ifdef DEVKIT_V1
 #define EVE2_PIN_INT (4)
 #define EVE2_PIN_PD (2) //je works with Devkit v1 www.doit.am
 #define EVE2_PIN_CS (5)
+#endif
+
 #define SPI_SPEED (20000000L) // FT813 up to 30Mhz ideally,  24MHz max for my fly lead proto
 #define EVE2_WORKBUFSIZE (32)
+
 
 //display options
 #define FT813_ENABLE (1)
@@ -35,6 +40,8 @@ Documents\PlatformIO\Projects\squirtDash\lib\proj_config\proj_config.h
 #define CANBR BR250     // sets CAN data rate
 #define MSCAN_BASE 0x60 // 1520  CAN  base address
 #define MSCAN_LEN EOA   // up to 64 total CAN addresses
+
+// lib\esp32_can-master\esp32_can.cpp  // has pin defs for CAN
 
 // gauge parms from VanaDash
 enum zoneIdx : uint8_t
@@ -57,6 +64,7 @@ enum measAdr : uint8_t // CAN Bus measurement addr (ID)
   adrOilPres,
   adrRPM, // 0x68
   adrSpeed,
+  adrTime,
   EOA
 }; // 0x0 - 0x9
 
@@ -96,6 +104,7 @@ const dialFace fuelGal = {7, "FUEL-G", "G", {0, 2, 3, 16}, {red, yel, blk}, {3, 
 const dialFace oilPres = {8, "OIL-P", "#", {20, 45, 55, 60}, {red, blk, red}, {5, 2, 5}, {red, grn, red}};
 const dialFace rpm = {9, "RPM", "", {0, 6000, 7300, 8000}, {blk, yel, red}, {1, 3, 4}, {grn, yel, red}};
 const dialFace speed = {10, "MPH", "", {0, 80, 120, 120}, {blk, yel, blk}, {1, 3, 0}, {grn, yel, blk}};
+
 
 // // Horizontal timing (minimum values from ILI6122_SPEC_V008.pdf page 45)
 // #define HPX   (800)    // Horizontal Pixel Width
